@@ -25,17 +25,27 @@ note_width, note_height = band_width / notes_number, 60 * window_scale
 note_colors = utils.colors.create_notes_color_palette(notes_number)
 outline_width = 1
 
-for i in range(notes_number):
-    note = pygame.Rect(
-        x_axis_padding + i * note_width, first_row_y, note_width, note_height
-    )
-    # Draw note
-    pygame.draw.rect(window, note_colors[i], note)
-    # Fix outline overlap
-    note.width += outline_width
-    note.x -= outline_width
-    # Draw note outline
-    pygame.draw.rect(window, (0, 0, 0), note, outline_width)
+# for i in range(notes_number):
+#     note = pygame.Rect(
+#         x_axis_padding + i * note_width, first_row_y, note_width, note_height
+#     )
+
+#     # Draw note
+#     pygame.draw.rect(window, note_colors[i], note)
+#     # Fix outline overlap
+#     note.width += outline_width
+#     note.x -= outline_width
+#     # Draw note outline
+#     pygame.draw.rect(window, (0, 0, 0), note, outline_width)
+
+utils.draw.draw_note_band(
+    window,
+    notes_number,
+    note_width,
+    note_height,
+    note_colors,
+    (x_axis_padding, first_row_y),
+)
 
 new_notes_number = 7
 new_note_width = band_width / new_notes_number
@@ -46,15 +56,9 @@ for i in range(new_notes_number):
         x_axis_padding + i * new_note_width, second_row_y, new_note_width, note_height
     )
 
-    total_width = new_note_width * (i + 1)
-    color = note_colors[base_note_index]
-
-    # Determine if the color of the new note usinng modulo
-    if i != 0 and (total_width % note_width) > 0.5 * new_note_width:
-        base_note_index += 1
-        color = note_colors[base_note_index]
-    # Special case where the a note aligned with the middle of a new note
-    elif i != 0 and (total_width % note_width) == 0.5 * new_note_width:
+    color_index = int((note.centerx - x_axis_padding) // note_width)
+    color = note_colors[color_index]
+    if (note.centerx - x_axis_padding) % note_width == 0:
         color = WHITE
 
     # Draw note
@@ -65,7 +69,7 @@ for i in range(new_notes_number):
     # Draw note outline
     pygame.draw.rect(window, (0, 0, 0), note, outline_width)
 
-    utils.draw.line_dashed(
+    utils.draw.draw_line_dashed(
         window,
         (226, 226, 226),
         (note.centerx, first_row_y + note_height),
