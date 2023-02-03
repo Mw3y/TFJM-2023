@@ -24,19 +24,19 @@ def generate_shades_palette(number_of_shades, color_palette, notes_number):
             if number_of_shades >= 5:
                 if j < 5:
                     shades_palette.append(generate_shade(rgb_values, 8 - 2 * j))
-                    print(
-                        f"shades: {number_of_shades}; j: {j}; color: {generate_shade(rgb_values, 10 - 2 * j)}"
-                    )
+                    # print(
+                    #     f"shades: {number_of_shades}; j: {j}; color: {generate_shade(rgb_values, 10 - 2 * j)}"
+                    # )
                 else:
                     shades_palette.append(generate_tint(rgb_values, 2 * (j - 5)))
-                    print(
-                        f"shades: {number_of_shades}; j: {j}; color: {generate_tint(rgb_values, 2 * j)}"
-                    )
+                    # print(
+                    #     f"shades: {number_of_shades}; j: {j}; color: {generate_tint(rgb_values, 2 * j)}"
+                    # )
             else:
                 shades_palette.append(generate_tint(rgb_values, 2 * j))
-                print(
-                    f"shades: {number_of_shades}; j: {j}; color: {generate_tint(rgb_values, 2 * j)}"
-                )
+                # print(
+                #     f"shades: {number_of_shades}; j: {j}; color: {generate_tint(rgb_values, 2 * j)}"
+                # )
     return shades_palette
 
 
