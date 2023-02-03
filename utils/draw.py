@@ -53,7 +53,7 @@ def draw_new_encoding_note_band(
             # Minus 1 to avoid overlapping with the outline
             (note_object.centerx, new_band_start_pos[1] - 1),
             width=2,
-            dash_length=4 * zoom_factor,
+            dash_length=10 * zoom_factor,
         )
 
 
@@ -80,11 +80,11 @@ def draw_notes(
     # Calculate the bandwidth based on the zoom factor
     band_width = 420 * int(exp(zoom_factor))
     x_axis_padding = ((window_width - band_width) / 2) + origin[0]
-    first_row_y, second_row_y = (origin[1] + 60) * zoom_factor, (
-        origin[1] + 145
-    ) * zoom_factor
 
-    note_width, note_height = band_width / notes_number, 60 * zoom_factor
+    note_width, note_height = band_width / notes_number, 60 * 2 * zoom_factor
+
+    first_row_y = (origin[1] + note_height) * zoom_factor
+    second_row_y = (origin[1] + 3 * note_height - 35) * zoom_factor
 
     draw_base_note_band(
         window,

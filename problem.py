@@ -8,9 +8,8 @@ window_height = 420 * 2
 zoom_factor = 1
 
 # Problem configuration
-notes_number = 420
+notes_number = 4
 new_notes_number = 7
-
 
 # Initializing Pygame
 pygame.init()
