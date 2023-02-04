@@ -64,7 +64,6 @@ while running:
         window, window_width, zoom_factor, origin, note_encodings, note_colors
     )
 
-    print(clock.get_fps())
     # Refresh window
     pygame.display.flip()
     # Set the framerate of the window
