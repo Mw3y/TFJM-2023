@@ -8,8 +8,7 @@ window_height = 420 * 2
 zoom_factor = 1
 
 # Problem configuration
-notes_number = 4
-new_notes_number = 7
+note_encodings = [4, 7, 12, 8]
 
 # Initializing Pygame
 pygame.init()
@@ -50,7 +49,7 @@ while running:
     # Set window background
     window.fill((255, 255, 255))
     # Draw notes
-    note_colors = utils.colors.create_notes_color_palette(notes_number)
-    utils.draw.draw_notes(window, window_width, zoom_factor, origin, notes_number, new_notes_number,  note_colors)
+    note_colors = utils.colors.create_notes_color_palette(note_encodings[0])
+    utils.draw.draw_notes(window, window_width, zoom_factor, origin, note_encodings,  note_colors)
     # Refresh window
     pygame.display.flip()
