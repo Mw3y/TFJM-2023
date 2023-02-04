@@ -153,9 +153,7 @@ def draw_line_dashed(
         [np.linspace(start_pos[i], end_pos[i], dash_amount) for i in range(2)]
     ).transpose()
 
-    for n in range(int(exclude_corners), dash_amount - int(exclude_corners), 2):
-        # print(f"i : {n}; len : {len(dash_knots)}")
-        if not n + 1 >= len(dash_knots):
-            pygame.draw.line(
-                surface, color, tuple(dash_knots[n]), tuple(dash_knots[n + 1]), width
-            )
+    for n in range(int(exclude_corners) + 1, dash_amount - int(exclude_corners), 2):
+        pygame.draw.line(
+            surface, color, tuple(dash_knots[n - 1]), tuple(dash_knots[n]), width
+        )
