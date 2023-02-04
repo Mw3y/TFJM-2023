@@ -31,6 +31,7 @@ def draw_new_encoding_note_band(
     zoom_factor=1,
     outline_width=1,
 ):
+    note_objects, new_note_colors = [], []
     for i in range(new_notes_number):
         note_object = pygame.Rect(
             new_band_start_pos[0] + i * new_note_width,
@@ -40,10 +41,15 @@ def draw_new_encoding_note_band(
         )
 
         # Determine the color of the new note
-        color_index = int((note_object.centerx - new_band_start_pos[0]) // note_width)
+        color_index = int(
+              (note_object.centerx - new_band_start_pos[0]) // note_width
+        )
+        # print(f"color_index: {color_index}; {note_width}")
         color = note_colors[color_index]
         if (note_object.centerx - new_band_start_pos[0]) % note_width == 0:
             color = (255, 255, 255)
+            
+        new_note_colors.append(color)
 
         draw_note(surface, note_object, color, outline_width)
         draw_line_dashed(
@@ -55,6 +61,9 @@ def draw_new_encoding_note_band(
             width=2,
             dash_length=8 * zoom_factor,
         )
+        note_objects.append(note_object)
+
+    return {"notes": list(note_objects), "colors": list(new_note_colors)}
 
 
 def draw_note(surface, note_object, color, outline_width):
@@ -83,6 +92,7 @@ def draw_notes(
     base_note_height = 60 * 2 * zoom_factor
     base_note_width = band_width / note_encodings[0]
     base_note_band_y = (origin[1] + base_note_height) * zoom_factor
+    # The space between two note bands
     bands_margin = base_note_height - 35
 
     draw_base_note_band(
@@ -94,8 +104,10 @@ def draw_notes(
         (x_axis_padding, base_note_band_y),
     )
 
+    previous_note_width = base_note_width
+    previous_note_colors = note_colors
     for i in range(1, len(note_encodings)):
-        # Determine the start Y axis position of the previous & current band 
+        # Determine the start Y axis position of the previous & current band
         previous_note_band_y = (
             origin[1] + base_note_height + 2 * (i - 1) * bands_margin
         ) * zoom_factor
@@ -106,19 +118,22 @@ def draw_notes(
         new_notes_number = note_encodings[i]
         # Calculate the new note width
         new_note_width = band_width / new_notes_number
-
-        draw_new_encoding_note_band(
+        # Draw the new note band
+        draw_result = draw_new_encoding_note_band(
             window,
             new_notes_number,
             new_note_width,
             (x_axis_padding, new_note_band_y),
-            # TODO: Take new note width into account
-            base_note_width,
+            previous_note_width,
             base_note_height,
-            note_colors,
+            previous_note_colors,
             (x_axis_padding, previous_note_band_y),
             zoom_factor,
         )
+
+        # Save the data of this band to use it for the next one
+        previous_note_colors = draw_result.get("colors")
+        previous_note_width = new_note_width
 
 
 def draw_line_dashed(
