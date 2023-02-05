@@ -6,6 +6,7 @@
 """
 
 import pygame
+import pygame_textinput
 import utils.draw
 import utils.colors
 
@@ -15,24 +16,33 @@ window_height = 420 * 2
 origin = [0, 0]
 zoom_factor = 1
 
-# Problem configuration
-note_encodings = [4, 7, 12, 8, 4]
+# Default problem configuration
+note_encodings = [4, 7]
 
 # Initializing Pygame
 pygame.init()
 
 window = pygame.display.set_mode((window_width, window_height))
 pygame.display.set_caption("Problème 4 - Musique déformée - TFJM² 2023")
-clock = pygame.time.Clock()  
+clock = pygame.time.Clock()
 
 running = True
 latest_mouse_pos = (0, 0)
 is_mouse_down = False
 
+# Create a manager with custom input validator
+textinput_manager = pygame_textinput.TextInputManager(
+    initial=", ".join(map(str, note_encodings))
+)
+
+# Create TextInput-object
+textinput = pygame_textinput.TextInputVisualizer(manager=textinput_manager)
+
 while running:
     current_mouse_pos = pygame.mouse.get_pos()
+    events = pygame.event.get()
 
-    for event in pygame.event.get():
+    for event in events:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEWHEEL:
@@ -64,7 +74,24 @@ while running:
         window, window_width, zoom_factor, origin, note_encodings, note_colors
     )
 
+    # Refresh the text input
+    textinput.update(events)
+    window.blit(textinput.surface, (10, 10))
+
+    # Change the note encodings based on the text input
+    try:
+        new_note_encodings = list(
+            map(int, textinput.value.replace(" ", "").rstrip(",").split(","))
+        )
+
+        if not new_note_encodings == note_encodings:
+            note_encodings = new_note_encodings
+            origin = [0, 0]
+            zoom_factor = 1
+    except:
+        print("Invalid encoding input.")
+
     # Refresh window
-    pygame.display.flip()
+    pygame.display.update()
     # Set the framerate of the window
     clock.tick(60)
