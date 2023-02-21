@@ -39,7 +39,7 @@ jobs:
           # Allow Nuitka to download external code if necessary, e.g. dependency walker, ccache, and even gcc on Windows. To disable, redirect input from nul device, e.g. "</dev/null" or "<NUL:". Default is to prompt.
           assume-yes-for-downloads: true
           # a comma separated list of plugins, such as pyside2, pyside6, tk-inter, etc.
-          # enable-plugins: # optional
+          enable-plugins: anti-bloat # optional
           # Include a whole package. Give as a Python namespace, e.g. "some_package.sub_package" and Nuitka will then find it and include it and all the modules found below that disk location in the binary or extension module it creates, and make it available for import by the code. To avoid unwanted sub packages, e.g. tests you can e.g. do this "--nofollow-import-to=*.tests". Default empty.
           # include-package: # optional
           # Include a single module. Give as a Python namespace, e.g. "some_package.some_module" and Nuitka will then find it and include it in the binary or extension module it creates, and make it available for import by the code. Default empty.
