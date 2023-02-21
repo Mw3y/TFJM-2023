@@ -80,3 +80,10 @@ jobs:
           # windows-onefile-tempdir-spec: # optional
           # When compiling for macOS, create a bundle rather than a plain binary application. Currently experimental and incomplete. Currently this is the only way to unlock disabling of console. Defaults to false.
           # macos-create-app-bundle: # optional
+
+      - name: Archive build EXE
+
+        uses: actions/upload-artifact@v3
+        with:
+          name: Problem_4_tfjm_2023_visualizer.exe
+          path: Problem_4_tfjm_2023_visualizer.exe
