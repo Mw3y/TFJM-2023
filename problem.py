@@ -3,12 +3,15 @@
  * Unauthorized copying of this file, via any medium is strictly prohibited
  * Proprietary and confidential
  * Written by Maxence Espagnet <maxence.espagnet16@gmail.com>, February 2023
+ *
+ * Compile with `nuitka --onefile --windows-icon-from-ico=".\icon.ico" problem.py -o Problem_4_tfjm_2023_visualizer.exe --follow-imports --windows-disable-console` 
 """
 
 import pygame
 import pygame_textinput
 import utils.draw
 import utils.colors
+import easydev  # import for nuitka
 
 # Window configuration
 window_width = 620 * 2
@@ -32,11 +35,18 @@ is_mouse_down = False
 
 # Create a manager with custom input validator
 textinput_manager = pygame_textinput.TextInputManager(
-    initial=", ".join(map(str, note_encodings))
+    validator=lambda input: not 0
+    in list(map(int, input.replace(" ", "").rstrip(",").split(","))),
+    initial=", ".join(map(str, note_encodings)),
 )
 
 # Create TextInput-object
-textinput = pygame_textinput.TextInputVisualizer(manager=textinput_manager)
+font_object = pygame.font.SysFont(
+    "Segoe UI", 32, True
+)
+textinput = pygame_textinput.TextInputVisualizer(
+    manager=textinput_manager, font_object=font_object
+)
 
 while running:
     current_mouse_pos = pygame.mouse.get_pos()
@@ -94,4 +104,4 @@ while running:
     # Refresh window
     pygame.display.update()
     # Set the framerate of the window
-    clock.tick(60)
+    clock.tick(30)

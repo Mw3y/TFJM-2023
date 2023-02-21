@@ -1,2 +1,9 @@
 logs
 */**/__pycache__
+problem.dist/**/*
+problem.onefile-build/**/*
+problem.build/**/*
+
+compile.bat
+icon.png
+*.exe
