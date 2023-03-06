@@ -40,15 +40,15 @@ def draw_new_encoding_note_band(
             note_height,
         )
 
+        # Determine the x coordinate of the new note center
+        note_centerx = new_note_width * i + new_note_width / 2
         # Determine the color of the new note
-        color_index = int(
-              (note_object.centerx - new_band_start_pos[0]) // note_width
-        )
+        color_index = int(note_centerx // note_width)
         # print(f"color_index: {color_index}; {note_width}")
         color = note_colors[color_index]
-        if (note_object.centerx - new_band_start_pos[0]) % note_width == 0:
+        if note_centerx % note_width == 0:
             color = (255, 255, 255)
-            
+
         new_note_colors.append(color)
 
         draw_note(surface, note_object, color, outline_width)
