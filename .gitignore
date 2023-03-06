@@ -7,3 +7,5 @@ problem.build/**/*
 compile.bat
 icon.png
 *.exe
+
+.vscode
