@@ -33,17 +33,22 @@ running = True
 latest_mouse_pos = (0, 0)
 is_mouse_down = False
 
+def get_textinput_unparsed_values(textinput):
+    return textinput.replace(" ", "").rstrip(",").split(",")
+
+def validate_textinput(textinput):
+    values = get_textinput_unparsed_values(textinput)
+    return '' in values or not 0 in list(map(int, values))
+
+
 # Create a manager with custom input validator
 textinput_manager = pygame_textinput.TextInputManager(
-    validator=lambda input: not 0
-    in list(map(int, input.replace(" ", "").rstrip(",").split(","))),
+    validator=validate_textinput,
     initial=", ".join(map(str, note_encodings)),
 )
 
 # Create TextInput-object
-font_object = pygame.font.SysFont(
-    "Segoe UI", 32, True
-)
+font_object = pygame.font.SysFont("Segoe UI", 32, True)
 textinput = pygame_textinput.TextInputVisualizer(
     manager=textinput_manager, font_object=font_object
 )
@@ -91,7 +96,7 @@ while running:
     # Change the note encodings based on the text input
     try:
         new_note_encodings = list(
-            map(int, textinput.value.replace(" ", "").rstrip(",").split(","))
+            map(int, get_textinput_unparsed_values(textinput.value))
         )
 
         if not new_note_encodings == note_encodings:
@@ -99,7 +104,7 @@ while running:
             origin = [0, 0]
             zoom_factor = 1
     except:
-        print("Invalid encoding input.")
+        print("Invalid encoding input detected.")
 
     # Refresh window
     pygame.display.update()
