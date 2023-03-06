@@ -33,12 +33,15 @@ running = True
 latest_mouse_pos = (0, 0)
 is_mouse_down = False
 
+# Extracts the raw values from the text input
 def get_textinput_unparsed_values(textinput):
     return textinput.replace(" ", "").rstrip(",").split(",")
 
+
+# Determines if a new text input should be accepted by the program
 def validate_textinput(textinput):
     values = get_textinput_unparsed_values(textinput)
-    return '' in values or not 0 in list(map(int, values))
+    return "" in values or not 0 in list(map(int, values))
 
 
 # Create a manager with custom input validator
@@ -104,7 +107,7 @@ while running:
             origin = [0, 0]
             zoom_factor = 1
     except:
-        print("Invalid encoding input detected.")
+        pass
 
     # Refresh window
     pygame.display.update()
