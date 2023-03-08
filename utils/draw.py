@@ -1,4 +1,5 @@
-from math import exp
+from math import exp, floor
+from decimal import Decimal, getcontext
 import numpy as np
 import pygame
 
@@ -46,7 +47,16 @@ def draw_new_encoding_note_band(
         color_index = int(note_centerx // note_width)
         # print(f"color_index: {color_index}; {note_width}")
         color = note_colors[color_index]
-        if note_centerx % note_width == 0:
+
+        # Try to fix the float accuracy
+        getcontext().prec = 7  # A float is accurate for approximately 7 decimals
+        decimalModulo = Decimal(note_centerx) % Decimal(note_width)
+        isDecimalModuloNull = (
+            decimalModulo == Decimal(note_width) / Decimal(1)
+            or floor(decimalModulo) == 0
+        )
+
+        if isDecimalModuloNull:
             color = (255, 255, 255)
 
         new_note_colors.append(color)
