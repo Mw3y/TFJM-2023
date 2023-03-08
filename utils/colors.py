@@ -1,4 +1,4 @@
-import math
+from math import ceil
 from colormap import hex2rgb
 
 
@@ -41,7 +41,7 @@ def generate_shades_palette(number_of_shades, color_palette, notes_number):
 
 
 def determine_shades_number(notes_number, available_colors, max_shades_number):
-    return math.ceil(((notes_number - available_colors) / max_shades_number) + 1)
+    return ceil(((notes_number - available_colors) / max_shades_number) + 1)
 
 
 def create_notes_color_palette(notes_number):
