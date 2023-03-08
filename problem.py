@@ -41,7 +41,10 @@ def get_textinput_unparsed_values(textinput):
 # Determines if a new text input should be accepted by the program
 def validate_textinput(textinput):
     values = get_textinput_unparsed_values(textinput)
-    return "" in values or not 0 in list(map(int, values))
+    try:
+        return "" in values or not 0 in list(map(int, values))
+    except:
+        return False,
 
 
 # Create a manager with custom input validator
