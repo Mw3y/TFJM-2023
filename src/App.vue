@@ -4,20 +4,15 @@
 
 	import {
 		AxesHelper,
-		Box3,
-		Color,
-		EdgesGeometry,
 		Group,
-		LineBasicMaterial,
-		LineSegments,
-		Mesh,
-		MeshBasicMaterial,
 		PerspectiveCamera,
-		PlaneGeometry,
 		Scene,
 		Vector3,
 		WebGLRenderer,
 	} from "three";
+
+	import { createNoteObject, getObject3DSize } from "./draw";
+	import { enable2DMovement } from "./mouse";
 
 	let renderer: WebGLRenderer;
 	const { width, height } = useWindowSize();
@@ -36,35 +31,20 @@
 		() => {
 			camera.aspect = width.value / height.value;
 			camera.updateProjectionMatrix();
-
 			renderer.setSize(width.value, height.value);
-			renderer.render(scene, camera);
 		},
 		{ throttle: 250 }
 	);
 
 	const group = new Group();
 	for (let i = 0; i < 5; i++) {
-		// Create the mesh of a new note
-		const square = new Mesh(
-			new PlaneGeometry(1, 1, 1, 1),
-			new MeshBasicMaterial({
-				color: new Color().setHex(Math.random() * 0xffffff),
-			})
-		);
-
-		// Draw the outline of the note
-		const geometry = new EdgesGeometry(square.geometry);
-		const material = new LineBasicMaterial({ color: 0xffffff });
-		const wireframe = new LineSegments(geometry, material);
-		// Set the note & outline position
-		wireframe.position.set(i, 0, 0);
-		square.position.set(i, 0, 0);
+		const position = new Vector3(i, 0, 0);
+		const noteObject = createNoteObject(position);
 		// Add the generated note components to the row
-		group.add(square, wireframe);
+		group.add(...noteObject);
 	}
 
-	const groupSize = new Box3().setFromObject(group).getSize(new Vector3());
+	const groupSize = getObject3DSize(group);
 	const xAxisOffset = -groupSize.x / 2 + 0.5;
 
 	group.position.set(xAxisOffset, 0, 0);
@@ -84,7 +64,12 @@
 		});
 		renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.setSize(width.value, height.value);
-		renderer.render(scene, camera);
+
+		enable2DMovement(camera, renderer);
+
+		renderer.setAnimationLoop(() => {
+			renderer.render(scene, camera);
+		});
 	});
 </script>
 
