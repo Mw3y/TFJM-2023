@@ -4,6 +4,7 @@ specifiers:
   '@types/three': ^0.149.0
   '@vitejs/plugin-vue': ^4.0.0
   '@vueuse/core': ^9.13.0
+  decimal.js: ^10.4.3
   three: ^0.150.1
   typescript: ^4.9.3
   vite: ^4.1.0
@@ -12,6 +13,7 @@ specifiers:
 
 dependencies:
   '@vueuse/core': 9.13.0_vue@3.2.47
+  decimal.js: 10.4.3
   three: 0.150.1
   vue: 3.2.47
 
@@ -423,6 +425,10 @@ packages:
   /de-indent/1.0.2:
     resolution: {integrity: sha512-e/1zu3xH5MQryN2zdVaF0OrdNLUbvWxzMbi+iNA6Bky7l1RoP8a2fIbRocyHclXt/arDrrR6lL3TqFD9pMQTsg==}
     dev: true
+
+  /decimal.js/10.4.3:
+    resolution: {integrity: sha512-VBBaLc1MgL5XpzgIP7ny5Z6Nx3UrRkIViUkPUdtl9aya5amy3De1gsUUSB1g3+3sExYNjCAsAznmukyxCb1GRA==}
+    dev: false
 
   /esbuild/0.16.17:
     resolution: {integrity: sha512-G8LEkV0XzDMNwXKgM0Jwu3nY3lSTwSGY6XbxM9cr9+s0T/qSV1q1JVPBGzm3dcjhCic9+emZDmMffkwgPeOeLg==}

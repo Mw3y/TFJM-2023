@@ -1,18 +1,23 @@
 <script setup lang="ts">
 	import { useWindowSize, watchThrottled } from "@vueuse/core";
 	import { onMounted, ref } from "vue";
+	import { enable2DMovement } from "./utilities/mouse";
 
 	import {
 		AxesHelper,
-		Group,
+		Color,
 		PerspectiveCamera,
 		Scene,
-		Vector3,
 		WebGLRenderer,
 	} from "three";
 
-	import { createNoteObject, getObject3DSize } from "./draw";
-	import { enable2DMovement } from "./mouse";
+	import {
+		calculateHorizontalOffset,
+		createNotesRow,
+		getObject3DSize,
+	} from "./utilities/draw";
+
+	import Decimal from "decimal.js";
 
 	let renderer: WebGLRenderer;
 	const { width, height } = useWindowSize();
@@ -36,26 +41,41 @@
 		{ throttle: 250 }
 	);
 
-	const group = new Group();
-	for (let i = 0; i < 5; i++) {
-		const position = new Vector3(i, 0, 0);
-		const noteObject = createNoteObject(position);
-		// Add the generated note components to the row
-		group.add(...noteObject);
-	}
+	const firstRow = createNotesRow({
+		notesNumber: 4,
+		colors: [
+			new Color(0x009fe3),
+			new Color(0x80cff1),
+			new Color(0xea5e00),
+			new Color(0xf4af80),
+		],
+	});
 
-	const groupSize = getObject3DSize(group);
-	const xAxisOffset = -groupSize.x / 2 + 0.5;
+	scene.add(firstRow);
 
-	group.position.set(xAxisOffset, 0, 0);
-	scene.add(group);
+	const newNoteWidth = getObject3DSize(firstRow).x / 7;
+	const newRowOffset = calculateHorizontalOffset(firstRow, newNoteWidth);
+	const testRow2 = createNotesRow({
+		notesNumber: 7,
+		rowOffset: newRowOffset,
+		noteWidth: new Decimal(newNoteWidth),
+		previousNoteWidth: new Decimal(1),
+		verticalAxisMargin: -0.75,
+		colors: [
+			new Color(0x009fe3),
+			new Color(0x80cff1),
+			new Color(0xea5e00),
+			new Color(0xf4af80),
+		],
+	});
+	scene.add(testRow2);
 
 	// Dev-only
 	// Show the coordinate system axes
 	scene.add(new AxesHelper(5));
 
 	/**
-	 * Execute once the webpage has been mounted.
+	 * Executes once the webpage has been mounted.
 	 */
 	onMounted(() => {
 		renderer = new WebGLRenderer({
