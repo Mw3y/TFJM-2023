@@ -12,8 +12,8 @@ import { PerspectiveCamera, Object3D, Box3, Vector3, Event } from "three";
 export function setCameraZoomToFitObject(
 	camera: PerspectiveCamera,
 	object: Object3D<Event>,
-	offset: number,
-	minFarValue: number = 20e100
+	offset: number = 0,
+	scaleFactor: number = 1
 ) {
 	const boundingBox = new Box3().setFromObject(object);
 
@@ -72,6 +72,6 @@ export function setCameraZoomToFitObject(
 	const minZ = boundingBox.min.z;
 	const cameraToFarEdge = minZ < 0 ? -minZ + cameraZ : cameraZ - minZ;
 
-	camera.far = minFarValue ?? cameraToFarEdge * 3;
+	camera.far = cameraToFarEdge * 3 * scaleFactor;
 	camera.updateProjectionMatrix();
 }

@@ -54,7 +54,8 @@
 	allNotesRows.scale.copy(new Vector3(scaleFactor, scaleFactor, scaleFactor));
 	// Center the camera & change the zoom level
 	centerObject(allNotesRows);
-	setCameraZoomToFitObject(camera, allNotesRows, 1.25);
+	setCameraZoomToFitObject(camera, allNotesRows, 2.5, scaleFactor);
+
 	// Render the notes rows
 	scene.add(allNotesRows);
 
