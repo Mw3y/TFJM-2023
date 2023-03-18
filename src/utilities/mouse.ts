@@ -1,4 +1,4 @@
-import { PerspectiveCamera, WebGLRenderer, MOUSE } from "three";
+import { PerspectiveCamera, WebGLRenderer, MOUSE, TOUCH } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 /**
@@ -18,6 +18,9 @@ export function enable2DMovement(
 	controls.target.set(0, 0, 0); // view direction perpendicular to XY-plane
 	controls.enableRotate = false; // Disable the possibility to rotate
 	controls.enableZoom = true; // Enable mouse scroll zoom
+
+	controls.touches.ONE = TOUCH.PAN
+	controls.touches.TWO = TOUCH.DOLLY_ROTATE
 
 	// Swap the default controls the be more user friendly
 	controls.mouseButtons.LEFT = MOUSE.RIGHT;
