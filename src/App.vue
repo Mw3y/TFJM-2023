@@ -1,7 +1,9 @@
 <script setup lang="ts">
 	import { useWindowSize, watchThrottled } from "@vueuse/core";
 	import { onMounted, ref } from "vue";
+
 	import { enable2DMovement } from "./utilities/mouse";
+	import { centerObject, createSoundtracks } from "./utilities/draw";
 	import { setCameraZoomToFitObject } from "./utilities/camera";
 
 	import {
@@ -14,7 +16,9 @@
 		WebGLRenderer,
 	} from "three";
 
-	import { centerObject, createSoundtracks } from "./utilities/draw";
+	
+	import Navbar from "./components/Navbar.vue";
+	import Sidebar from "./components/Sidebar.vue";
 
 	let renderer: WebGLRenderer;
 	const { width, height } = useWindowSize();
@@ -61,7 +65,7 @@
 
 	// Dev-only
 	// Show the coordinate system axes
-	scene.add(new AxesHelper(5 * scaleFactor));
+	// scene.add(new AxesHelper(5 * scaleFactor));
 
 	/**
 	 * Executes once the webpage has been mounted.
@@ -84,6 +88,8 @@
 </script>
 
 <template>
+	<Navbar />
+	<Sidebar />
 	<canvas ref="canvas" />
 </template>
 
