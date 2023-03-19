@@ -28,6 +28,6 @@
 		:value="modelValue"
 		@input="updateValue"
 		type="range"
-		class="w-full h-2 mb-6 bg-gray-50 rounded-lg appearance-none cursor-pointer"
+		class="w-full h-2 mb-6 bg-white rounded-lg appearance-none cursor-pointer"
 	/>
 </template>

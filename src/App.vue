@@ -3,22 +3,9 @@
 	import { onMounted, ref, watch } from "vue";
 
 	import { enable2DMovement } from "./utilities/mouse";
-	import {
-		centerObject,
-		clearScene,
-		createSoundtracks,
-		drawSoundtracks,
-	} from "./utilities/draw";
-	import { setCameraZoomToFitObject } from "./utilities/controls";
+	import { drawSoundtracks, generateColorPalette } from "./utilities/draw";
 
-	import {
-		Color,
-		Group,
-		PerspectiveCamera,
-		Scene,
-		Vector3,
-		WebGLRenderer,
-	} from "three";
+	import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
 
 	import Navbar from "./components/Navbar.vue";
 	import Sidebar from "./components/Sidebar.vue";
@@ -45,23 +32,32 @@
 		{ throttle: 250 }
 	);
 
-	let colors = [
-		new Color(0x009fe3),
-		new Color(0x80cff1),
-		new Color(0xea5e00),
-		new Color(0xf4af80),
-		new Color(0x3d405b),
-		new Color(0x5f6178)
-	];
+	const defaultResolutions = [4, 7];
+	const resolutions = ref(defaultResolutions);
+
+	let colors = generateColorPalette(Math.max(...resolutions.value));
 
 	const maxScaleFactor = 10e6;
 	const scaleFactor = ref(maxScaleFactor);
-	
-	const resolutions = ref([4, 7]);
+
 	drawSoundtracks(scene, camera, resolutions.value, colors);
 
 	watch([resolutions, scaleFactor], function () {
-		drawSoundtracks(scene, camera, resolutions.value, colors, scaleFactor.value);
+
+		// Reset the resolution on bad input
+		if (resolutions.value.includes(NaN)) {
+			resolutions.value = defaultResolutions;
+		}
+
+		colors = generateColorPalette(Math.max(...resolutions.value));
+
+		drawSoundtracks(
+			scene,
+			camera,
+			resolutions.value,
+			colors,
+			scaleFactor.value
+		);
 	});
 
 	/**
@@ -89,6 +85,7 @@
 		renderer = new WebGLRenderer({
 			canvas: canvas.value ?? undefined,
 			alpha: true,
+			antialias: true,
 		});
 		renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.setSize(width.value, height.value);
