@@ -1,13 +1,17 @@
 <script setup lang="ts">
 	import { useWindowSize, watchThrottled } from "@vueuse/core";
-	import { onMounted, ref } from "vue";
+	import { onMounted, ref, watch } from "vue";
 
 	import { enable2DMovement } from "./utilities/mouse";
-	import { centerObject, createSoundtracks } from "./utilities/draw";
-	import { setCameraZoomToFitObject } from "./utilities/camera";
+	import {
+		centerObject,
+		clearScene,
+		createSoundtracks,
+		drawSoundtracks,
+	} from "./utilities/draw";
+	import { setCameraZoomToFitObject } from "./utilities/controls";
 
 	import {
-		AxesHelper,
 		Color,
 		Group,
 		PerspectiveCamera,
@@ -16,7 +20,6 @@
 		WebGLRenderer,
 	} from "three";
 
-	
 	import Navbar from "./components/Navbar.vue";
 	import Sidebar from "./components/Sidebar.vue";
 
@@ -47,21 +50,33 @@
 		new Color(0x80cff1),
 		new Color(0xea5e00),
 		new Color(0xf4af80),
+		new Color(0x3d405b),
+		new Color(0x5f6178)
 	];
 
-	const resolutions = [4, 7];
-	const notesRows = createSoundtracks(resolutions, colors);
+	const maxScaleFactor = 10e6;
+	const scaleFactor = ref(maxScaleFactor);
+	
+	const resolutions = ref([4, 7]);
+	drawSoundtracks(scene, camera, resolutions.value, colors);
 
-	const scaleFactor = 10e6;
-	const allNotesRows = new Group().add(...notesRows);
-	// Scale everything up for easier visibility
-	allNotesRows.scale.copy(new Vector3(scaleFactor, scaleFactor, scaleFactor));
-	// Center the camera & change the zoom level
-	centerObject(allNotesRows);
-	setCameraZoomToFitObject(camera, allNotesRows, 2.5, scaleFactor);
+	watch([resolutions, scaleFactor], function () {
+		drawSoundtracks(scene, camera, resolutions.value, colors, scaleFactor.value);
+	});
 
-	// Render the notes rows
-	scene.add(allNotesRows);
+	/**
+	 * Updates the resolution list
+	 * @param newResolutions
+	 */
+	const changeResolutionList = (newResolutions: Array<number>) =>
+		(resolutions.value = newResolutions);
+
+	/**
+	 * Updates the scale factor
+	 * @param newScaleFactor
+	 */
+	const changeScaleFactor = (newScaleFactor: number) =>
+		(scaleFactor.value = newScaleFactor);
 
 	// Dev-only
 	// Show the coordinate system axes
@@ -81,7 +96,6 @@
 		enable2DMovement(camera, renderer);
 
 		renderer.setAnimationLoop(() => {
-			console.log(camera.position);
 			renderer.render(scene, camera);
 		});
 	});
@@ -89,7 +103,11 @@
 
 <template>
 	<Navbar />
-	<Sidebar />
+	<Sidebar
+		@resolutionChange="changeResolutionList"
+		@scaleFactorChange.lazy="changeScaleFactor"
+		:scaleFactorMax="maxScaleFactor"
+	/>
 	<canvas ref="canvas" />
 </template>
 
@@ -98,7 +116,8 @@
 		/* color-scheme: light dark; */
 		color-scheme: light;
 		color: rgba(255, 255, 255, 0.87);
-		background-color: rgb(250, 249, 246);
+		/* background-color: rgb(250, 249, 246); */
+		background-color: #ebebeb;
 		/* background-color: #242424; */
 
 		font-synthesis: none;

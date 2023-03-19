@@ -13,9 +13,12 @@ import {
 	Group,
 	LineDashedMaterial,
 	BufferGeometry,
+	Scene,
+	PerspectiveCamera,
 } from "three";
 
 import { Decimal } from "decimal.js";
+import { setCameraZoomToFitObject } from "./controls";
 
 Decimal.config({
 	modulo: Decimal.EUCLID,
@@ -105,7 +108,7 @@ export function createIndividualSoundtrack({
 	previousNoteWidth?: Decimal;
 }) {
 	// If there's too many notes, the outline is hidden.
-	const disableNoteOutline = notesNumber > 1000;
+	const disableNoteOutline = notesNumber >= 500;
 
 	const notesRow = new Group();
 	const newColors = new Array<Color>();
@@ -150,6 +153,11 @@ export function createIndividualSoundtrack({
 	return { notesRow, newColors };
 }
 
+/**
+ * Creates soundtracks in the right order based on the resolutions and colors provided.
+ * @param resolutions 
+ * @param colors 
+ */
 export function createSoundtracks(
 	resolutions: Array<number>,
 	colors: Array<Color>
@@ -205,6 +213,36 @@ export function createDashedLine(startPosition: Vector3, endPosition: Vector3) {
 }
 
 /**
+ * Draws all of the soundtracks to the screen.
+ *
+ * @param scene - The scene to draw to.
+ * @param camera
+ * @param resolutions
+ * @param colors
+ * @param scaleFactor
+ */
+export function drawSoundtracks(
+	scene: Scene,
+	camera: PerspectiveCamera,
+	resolutions: Array<number>,
+	colors: Array<Color>,
+	scaleFactor: number = 10e6
+) {
+	clearScene(scene);
+
+	const notesRows = createSoundtracks(resolutions, colors);
+	const allNotesRows = new Group().add(...notesRows);
+	// Scale everything up for easier visibility
+	allNotesRows.scale.copy(new Vector3(scaleFactor, scaleFactor, scaleFactor));
+	// Center the camera & change the zoom level
+	centerObject(allNotesRows);
+	setCameraZoomToFitObject(camera, allNotesRows, 2.5, scaleFactor);
+
+	// Render the notes rows
+	scene.add(allNotesRows);
+}
+
+/**
  * Calculates the size of a 3D object.
  * @param object - The object to get the size of
  * @return { Vector3 } A triplet of numbers containing the size of the object on each axis.
@@ -224,3 +262,10 @@ export function centerObject(object: Object3D<Event>) {
 		.getCenter(object.position)
 		.multiplyScalar(-1);
 }
+
+/**
+ * Removes all objects from the scene.
+ * @param scene
+ */
+export const clearScene = (scene: Scene) =>
+	scene.remove.apply(scene, scene.children);
