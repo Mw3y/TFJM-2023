@@ -21,18 +21,34 @@
 		emit("scaleFactorChange", parseInt(scaleFactor.value))
 	);
 
+	const resolutions = computed(() => {
+		return resolutionsInputContent.value
+			.replaceAll(" ", "")
+			.replace(/,\s*$/, "")
+			.split(",")
+			.map((value) => parseInt(value))
+			.filter((value) => !isNaN(value));
+	});
+
 	const resolutionsInputContent = ref("");
 	function handleResolutionsChange() {
-		try {
-			const resolutions = resolutionsInputContent.value
-				.replaceAll(" ", "")
-				.replace(/,\s*$/, "")
-				.split(",")
-				.map((value) => parseInt(value));
+		emit("resolutionChange", resolutions.value);
+	}
 
-			emit("resolutionChange", resolutions);
-		} catch (error) {
-			console.error(error);
+	function validateResolutionInput(event: Event) {
+		const pattern = /(?:,|\s|\d+)/;
+		const key = (event as KeyboardEvent).key;
+		if (!pattern.test(key)) {
+			event.preventDefault();
+		}
+	}
+
+	function addResolutionSeparator() {
+		if (
+			resolutions.value.length > 0 &&
+			!resolutionsInputContent.value.trim().endsWith(",")
+		) {
+			resolutionsInputContent.value += ", ";
 		}
 	}
 
@@ -48,7 +64,7 @@
 <template>
 	<div
 		:class="{ '!w-fit !p-3': isSidebarHidden }"
-		class="flex gap-4 flex-col max-w-md lg:max-w-none absolute top-0 left-0 right-0 sm:right-auto w-11/12 sm:2/12 md:w-4/12 lg:w-3/12 xl:w-1/6 m-4 rounded-xl bg-[#f0f0f0] px-4 py-3 shadow-2xl shadow-zinc-200 border-[#bdbdbd] border"
+		class="flex gap-4 flex-col max-w-md max-h-screen lg:max-w-none absolute top-0 left-0 right-0 sm:right-auto w-11/12 sm:2/12 md:w-4/12 lg:w-3/12 xl:w-1/6 m-4 rounded-xl bg-[#f0f0f0] px-4 py-3 shadow-2xl shadow-zinc-200 border-[#bdbdbd] border"
 	>
 		<img
 			@click="hideOrShowSidebar"
@@ -60,6 +76,8 @@
 			<Input
 				id="resolutions-input"
 				v-model="resolutionsInputContent"
+				:validator="validateResolutionInput"
+				@keydown.tab.prevent="addResolutionSeparator"
 				@submit="handleResolutionsChange"
 			/>
 			<Range

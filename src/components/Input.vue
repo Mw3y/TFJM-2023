@@ -2,9 +2,14 @@
 	const props = defineProps<{
 		id: string;
 		modelValue: string;
+		validator: (event: Event) => void
 	}>();
 
-	const emit = defineEmits(["update:modelValue", "submit"]);
+	const emit = defineEmits([
+		"update:modelValue",
+		"submit",
+		"keyup-tab",
+	]);
 	const updateValue = (event: Event) => {
 		emit("update:modelValue", (event.target as HTMLInputElement).value);
 	};
@@ -16,6 +21,7 @@
 			:id="id"
 			:value="modelValue"
 			@input="updateValue"
+			@keypress="validator"
 			@keyup.enter="emit('submit')"
 			type="text"
 			class="block w-full p-4 text-base text-neutral-600 border border-[#bdbdbd] rounded-xl bg-gray-50 focus:ring-blue-500 focus:border-blue-500 outline-none"
