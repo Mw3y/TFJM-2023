@@ -9,6 +9,7 @@
 
 	import Navbar from "../components/Navbar.vue";
 	import Sidebar from "../components/Sidebar.vue";
+	import Decimal from "decimal.js";
 
 	let renderer: WebGLRenderer;
 	const { width, height } = useWindowSize();
@@ -40,10 +41,19 @@
 	const maxScaleFactor = 10e6;
 	const scaleFactor = ref(maxScaleFactor);
 
-	drawSoundtracks(scene, camera, resolutions.value, colors);
+	const defaultDecimalAccuracy = 14;
+	const decimalAccuracy = ref(defaultDecimalAccuracy);
 
-	watch([resolutions, scaleFactor], function () {
+	drawSoundtracks(
+		scene,
+		camera,
+		resolutions.value,
+		colors,
+		scaleFactor.value,
+		decimalAccuracy.value
+	);
 
+	watch([resolutions, scaleFactor, decimalAccuracy], function () {
 		// Reset the resolution on bad input
 		if (resolutions.value.length < 1) {
 			resolutions.value = defaultResolutions;
@@ -56,7 +66,8 @@
 			camera,
 			resolutions.value,
 			colors,
-			scaleFactor.value
+			scaleFactor.value,
+			decimalAccuracy.value
 		);
 	});
 
@@ -73,6 +84,13 @@
 	 */
 	const changeScaleFactor = (newScaleFactor: number) =>
 		(scaleFactor.value = newScaleFactor);
+
+	/**
+	 * Updates the decimal accuracy
+	 * @param newDecimalAccuracy
+	 */
+	const changeDecimalAccuracy = (newDecimalAccuracy: number) =>
+		(decimalAccuracy.value = newDecimalAccuracy);
 
 	// Dev-only
 	// Show the coordinate system axes
@@ -103,7 +121,9 @@
 	<Sidebar
 		@resolutionChange="changeResolutionList"
 		@scaleFactorChange.lazy="changeScaleFactor"
+		@decimalAccuracyChange.lazy="changeDecimalAccuracy"
 		:scaleFactorMax="maxScaleFactor"
+		:defaultDecimalAccuracy="defaultDecimalAccuracy"
 	/>
 	<canvas ref="canvas" />
 </template>

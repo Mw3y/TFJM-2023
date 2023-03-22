@@ -5,20 +5,29 @@
 
 	const props = defineProps<{
 		scaleFactorMax: number;
+		defaultDecimalAccuracy: number;
 	}>();
 
 	const emit = defineEmits<{
 		(e: "resolutionChange", value: Array<number>): void;
 		(e: "scaleFactorChange", value: number): void;
+		(e: "decimalAccuracyChange", value: number): void;
 	}>();
 
 	const scaleFactor = ref(props.scaleFactorMax.toString());
 	const scaleFactorLabel = computed(
 		() => "Échelle " + scaleFactor.value + "%"
 	);
-
 	watch(scaleFactor, () =>
 		emit("scaleFactorChange", parseInt(scaleFactor.value))
+	);
+
+	const decimalAccuracy = ref(props.defaultDecimalAccuracy.toString());
+	const decimalAccuracyLabel = computed(
+		() => "Précision ." + decimalAccuracy.value
+	);
+	watch(decimalAccuracy, () =>
+		emit("decimalAccuracyChange", parseInt(decimalAccuracy.value))
 	);
 
 	const resolutions = computed(() => {
@@ -72,7 +81,7 @@
 			class="w-10 h-10 p-2"
 			src="/svg/arrow-left.svg"
 		/>
-		<div v-if="!isSidebarHidden" class="flex flex-col gap-3">
+		<div v-if="!isSidebarHidden" class="flex flex-col gap-4 mb-4">
 			<Input
 				id="resolutions-input"
 				v-model="resolutionsInputContent"
@@ -80,13 +89,22 @@
 				@keydown.tab.prevent="addResolutionSeparator"
 				@submit="handleResolutionsChange"
 			/>
-			<Range
-				:label="scaleFactorLabel"
-				:min="1"
-				:max="props.scaleFactorMax"
-				v-model="scaleFactor"
-				id="scale-selector"
-			/>
+			<div class="flex flex-col gap-2">
+				<Range
+					:label="decimalAccuracyLabel"
+					:min="1"
+					:max="16"
+					v-model="decimalAccuracy"
+					id="decimal-accuracy"
+				/>
+				<Range
+					:label="scaleFactorLabel"
+					:min="1"
+					:max="props.scaleFactorMax"
+					v-model="scaleFactor"
+					id="scale-selector"
+				/>
+			</div>
 		</div>
 
 		<h3

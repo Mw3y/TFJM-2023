@@ -14,20 +14,22 @@
 </script>
 
 <template>
-	<label
-		v-if="props.label"
-		:for="props.id"
-		class="block mb-2 text-lg font-medium text-neutral-500"
-	>
-		{{ props.label }}
-	</label>
-	<input
-		:id="props.id"
-		:max="props.max"
-		:min="props.min"
-		:value="modelValue"
-		@input="updateValue"
-		type="range"
-		class="w-full h-2 mb-6 bg-white rounded-lg appearance-none cursor-pointer"
-	/>
+	<div class="flex flex-col gap-1">
+		<label
+			v-if="props.label"
+			:for="props.id"
+			class="block mb-2 text-lg font-medium text-neutral-500"
+		>
+			{{ props.label }}
+		</label>
+		<input
+			:id="props.id"
+			:max="props.max"
+			:min="props.min"
+			:value="modelValue"
+			@input="updateValue"
+			type="range"
+			class="w-full h-2 bg-white rounded-lg appearance-none cursor-pointer"
+		/>
+	</div>
 </template>

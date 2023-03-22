@@ -20,11 +20,6 @@ import {
 import { Decimal } from "decimal.js";
 import { setCameraZoomToFitObject } from "./controls";
 
-Decimal.config({
-	modulo: Decimal.EUCLID,
-	precision: 16,
-});
-
 /**
  * Draws the outline of an object.
  * @param geometry - The object geometry
@@ -226,9 +221,15 @@ export function drawSoundtracks(
 	camera: PerspectiveCamera,
 	resolutions: Array<number>,
 	colors: Array<Color>,
-	scaleFactor: number = 10e6
+	scaleFactor: number,
+	decimalAccuracy: number,
 ) {
 	clearScene(scene);
+
+	Decimal.config({
+		modulo: Decimal.EUCLID,
+		precision: decimalAccuracy,
+	});
 
 	const notesRows = createSoundtracks(resolutions, colors);
 	const allNotesRows = new Group().add(...notesRows);
