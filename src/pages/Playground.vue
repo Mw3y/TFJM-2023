@@ -9,7 +9,6 @@
 
 	import Navbar from "../components/Navbar.vue";
 	import Sidebar from "../components/Sidebar.vue";
-	import Decimal from "decimal.js";
 
 	let renderer: WebGLRenderer;
 	const { width, height } = useWindowSize();
@@ -41,7 +40,7 @@
 	const maxScaleFactor = 10e6;
 	const scaleFactor = ref(maxScaleFactor);
 
-	const defaultDecimalAccuracy = 14;
+	const defaultDecimalAccuracy = 20;
 	const decimalAccuracy = ref(defaultDecimalAccuracy);
 
 	drawSoundtracks(

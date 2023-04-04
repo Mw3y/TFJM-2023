@@ -16,7 +16,7 @@
 
 	const scaleFactor = ref(props.scaleFactorMax.toString());
 	const scaleFactorLabel = computed(
-		() => "Échelle " + scaleFactor.value + "%"
+		() => "Échelle : " + scaleFactor.value + "%"
 	);
 	watch(scaleFactor, () =>
 		emit("scaleFactorChange", parseInt(scaleFactor.value))
@@ -24,7 +24,7 @@
 
 	const decimalAccuracy = ref(props.defaultDecimalAccuracy.toString());
 	const decimalAccuracyLabel = computed(
-		() => "Précision ." + decimalAccuracy.value
+		() => "Précision : " + decimalAccuracy.value + " décimales"
 	);
 	watch(decimalAccuracy, () =>
 		emit("decimalAccuracyChange", parseInt(decimalAccuracy.value))
@@ -92,8 +92,8 @@
 			<div class="flex flex-col gap-2">
 				<Range
 					:label="decimalAccuracyLabel"
-					:min="1"
-					:max="16"
+					:min="20"
+					:max="1e3"
 					v-model="decimalAccuracy"
 					id="decimal-accuracy"
 				/>

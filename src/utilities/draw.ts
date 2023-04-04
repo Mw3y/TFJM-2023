@@ -111,14 +111,16 @@ export function createIndividualSoundtrack({
 	// Create the note mesh and outline for each note
 	for (let i = 0; i < notesNumber; i++) {
 		// The position of the note
-		const position = new Vector3(noteWidth.times(i).toNumber(), 0, 0);
+		const noteX = noteWidth.times(i);
+		const position = new Vector3(noteX.toNumber(), 0, 0);
 
 		const halfNoteWidth = noteWidth.dividedBy(2);
-		const noteX = new Decimal(position.x);
 		const noteCenterX = noteX.add(halfNoteWidth);
 
 		// Determine if the note falls between two previous notes
-		const isModuloNull = noteCenterX.modulo(previousNoteWidth).equals(0);
+		const modulo = noteCenterX.toNumber() % previousNoteWidth.toNumber();
+		const isModuloNull = modulo == 0;
+
 		// Determine the index of the note color
 		const colorIndex = noteCenterX
 			.dividedToIntegerBy(previousNoteWidth)
@@ -129,6 +131,18 @@ export function createIndividualSoundtrack({
 		const noteColor = isModuloNull
 			? new Color(0xffffff)
 			: colors[colorIndex];
+
+		console.log({
+			i,
+			position,
+			noteColor,
+			noteCenterX: noteCenterX.toNumber(),
+			noteX: noteX.toNumber(),
+			halfNoteWidth: halfNoteWidth.toNumber(),
+			previousNoteWidth: previousNoteWidth.toNumber(),
+			modulo: noteCenterX.modulo(previousNoteWidth).toNumber(),
+			colorIndex,
+		});
 
 		// Create the note object
 		const [noteMesh, noteOutline] = createNoteObject(
@@ -222,7 +236,7 @@ export function drawSoundtracks(
 	resolutions: Array<number>,
 	colors: Array<Color>,
 	scaleFactor: number,
-	decimalAccuracy: number,
+	decimalAccuracy: number
 ) {
 	clearScene(scene);
 
