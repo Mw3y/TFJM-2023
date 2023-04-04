@@ -22,6 +22,9 @@ export function setCameraZoomToFitObject(
 	const size = new Vector3();
 	boundingBox.getSize(size);
 
+	const center = new Vector3();
+	boundingBox.getCenter(center);
+
 	// Figure out how to fit the box in the view:
 	// 1. figure out horizontal FOV (on non-1.0 aspects)
 	// 2. figure out distance from the object in X and Y planes
@@ -69,7 +72,7 @@ export function setCameraZoomToFitObject(
 	}
 
 	camera.position.set(0, 0, cameraZ);
-	orbitControls.target.set(0, 0, cameraZ)
+	orbitControls.target = center;
 
 	// Set the far plane of the camera so that it easily encompasses the whole object
 	const minZ = boundingBox.min.z;
