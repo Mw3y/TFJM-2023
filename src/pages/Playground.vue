@@ -2,7 +2,8 @@
 	import { useWindowSize, watchThrottled } from "@vueuse/core";
 	import { onMounted, ref, watch } from "vue";
 
-	import { enable2DMovement } from "../utilities/mouse";
+	import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+	import { enable2DMovement } from "../utilities/controls";
 	import { drawSoundtracks, generateColorPalette } from "../utilities/draw";
 
 	import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
@@ -11,6 +12,7 @@
 	import Sidebar from "../components/Sidebar.vue";
 
 	let renderer: WebGLRenderer;
+	let orbitControls: OrbitControls;
 	const { width, height } = useWindowSize();
 	const [scene, canvas] = [new Scene(), ref(null)];
 
@@ -43,15 +45,6 @@
 	const defaultDecimalAccuracy = 20;
 	const decimalAccuracy = ref(defaultDecimalAccuracy);
 
-	drawSoundtracks(
-		scene,
-		camera,
-		resolutions.value,
-		colors,
-		scaleFactor.value,
-		decimalAccuracy.value
-	);
-
 	watch([resolutions, scaleFactor, decimalAccuracy], function () {
 		// Reset the resolution on bad input
 		if (resolutions.value.length < 1) {
@@ -66,7 +59,8 @@
 			resolutions.value,
 			colors,
 			scaleFactor.value,
-			decimalAccuracy.value
+			decimalAccuracy.value,
+			orbitControls
 		);
 	});
 
@@ -107,7 +101,17 @@
 		renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.setSize(width.value, height.value);
 
-		enable2DMovement(camera, renderer);
+		orbitControls = enable2DMovement(camera, renderer);
+
+		drawSoundtracks(
+			scene,
+			camera,
+			resolutions.value,
+			colors,
+			scaleFactor.value,
+			decimalAccuracy.value,
+			orbitControls
+		);
 
 		renderer.setAnimationLoop(() => {
 			renderer.render(scene, camera);

@@ -18,7 +18,8 @@ import {
 } from "three";
 
 import { Decimal } from "decimal.js";
-import { setCameraZoomToFitObject } from "./controls";
+import { setCameraZoomToFitObject } from "./camera";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 /**
  * Draws the outline of an object.
@@ -229,6 +230,8 @@ export function createDashedLine(startPosition: Vector3, endPosition: Vector3) {
  * @param resolutions
  * @param colors
  * @param scaleFactor
+ * @param decimalAccuracy
+ * @param orbitControls
  */
 export function drawSoundtracks(
 	scene: Scene,
@@ -236,7 +239,8 @@ export function drawSoundtracks(
 	resolutions: Array<number>,
 	colors: Array<Color>,
 	scaleFactor: number,
-	decimalAccuracy: number
+	decimalAccuracy: number,
+	orbitControls: OrbitControls
 ) {
 	clearScene(scene);
 
@@ -251,7 +255,7 @@ export function drawSoundtracks(
 	allNotesRows.scale.copy(new Vector3(scaleFactor, scaleFactor, scaleFactor));
 	// Center the camera & change the zoom level
 	centerObject(allNotesRows);
-	setCameraZoomToFitObject(camera, allNotesRows, 2.5, scaleFactor);
+	setCameraZoomToFitObject(camera, allNotesRows, orbitControls, 2.5, scaleFactor);
 
 	// Render the notes rows
 	scene.add(allNotesRows);
