@@ -10,7 +10,7 @@
 			</h1>
 		</div>
 		<div class="flex space-x-2 pl-12 sm:pl-0 justify-start w-full sm:w-auto text-sm sm:text-xl text-neutral-400 font-normal">
-			<h3 class="sm:invisible">Créé par Maxence ESPAGNET.</h3>
+			<h3 class="sm:invisible">Créé par <a class="underline font-medium" href="https://suivix.xyz" target="_blank">Maxence ESPAGNET</a></h3>
 			<h2>TFJM² 2023</h2>
 		</div>
 	</div>
