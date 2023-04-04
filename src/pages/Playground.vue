@@ -1,18 +1,17 @@
 <script setup lang="ts">
 	import { useWindowSize, watchThrottled } from "@vueuse/core";
-	import { onMounted, ref, watch } from "vue";
-
-	import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-	import { enable2DMovement } from "../utilities/controls";
-	import { drawSoundtracks, generateColorPalette } from "../utilities/draw";
-
+	import { onMounted, ref } from "vue";
 	import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
 
 	import Navbar from "../components/Navbar.vue";
 	import Sidebar from "../components/Sidebar.vue";
+	import { enable2DMovement } from "../utilities/controls";
+	import {
+		useNotesPlayground,
+		changeResolutionList,
+	} from "../composables/useNotesPlayground";
 
 	let renderer: WebGLRenderer;
-	let orbitControls: OrbitControls;
 	const { width, height } = useWindowSize();
 	const [scene, canvas] = [new Scene(), ref(null)];
 
@@ -20,6 +19,15 @@
 	const camera = new PerspectiveCamera(50, width.value / height.value);
 	camera.position.set(0, 0, 8);
 	scene.add(camera);
+
+	/**
+	 * App settings
+	 */
+	const maxScaleFactor = 10e6;
+	const scaleFactor = ref(maxScaleFactor);
+
+	const defaultDecimalAccuracy = 20;
+	const decimalAccuracy = ref(defaultDecimalAccuracy);
 
 	/**
 	 * Watch for a window resize.
@@ -34,42 +42,9 @@
 		{ throttle: 250 }
 	);
 
-	const defaultResolutions = [4, 7];
-	const resolutions = ref(defaultResolutions);
-
-	let colors = generateColorPalette(Math.max(...resolutions.value));
-
-	const maxScaleFactor = 10e6;
-	const scaleFactor = ref(maxScaleFactor);
-
-	const defaultDecimalAccuracy = 20;
-	const decimalAccuracy = ref(defaultDecimalAccuracy);
-
-	watch([resolutions, scaleFactor, decimalAccuracy], function () {
-		// Reset the resolution on bad input
-		if (resolutions.value.length < 1) {
-			resolutions.value = defaultResolutions;
-		}
-
-		colors = generateColorPalette(Math.max(...resolutions.value));
-
-		drawSoundtracks(
-			scene,
-			camera,
-			resolutions.value,
-			colors,
-			scaleFactor.value,
-			decimalAccuracy.value,
-			orbitControls
-		);
-	});
-
-	/**
-	 * Updates the resolution list
-	 * @param newResolutions
-	 */
-	const changeResolutionList = (newResolutions: Array<number>) =>
-		(resolutions.value = newResolutions);
+	// Dev-only
+	// Show the coordinate system axes
+	// scene.add(new AxesHelper(5 * scaleFactor));
 
 	/**
 	 * Updates the scale factor
@@ -85,10 +60,6 @@
 	const changeDecimalAccuracy = (newDecimalAccuracy: number) =>
 		(decimalAccuracy.value = newDecimalAccuracy);
 
-	// Dev-only
-	// Show the coordinate system axes
-	// scene.add(new AxesHelper(5 * scaleFactor));
-
 	/**
 	 * Executes once the webpage has been mounted.
 	 */
@@ -101,16 +72,12 @@
 		renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.setSize(width.value, height.value);
 
-		orbitControls = enable2DMovement(camera, renderer);
-
-		drawSoundtracks(
+		useNotesPlayground(
 			scene,
 			camera,
-			resolutions.value,
-			colors,
-			scaleFactor.value,
-			decimalAccuracy.value,
-			orbitControls
+			enable2DMovement(camera, renderer),
+			scaleFactor,
+			decimalAccuracy
 		);
 
 		renderer.setAnimationLoop(() => {
