@@ -35,13 +35,14 @@
 	const resolutions = ref(defaultResolutions);
 
 	const maxScaleFactor = 10e6;
-	const defaultScaleFactor =
-		parseInt(currentRoute.query["scale-factor"] as string) ??
-		maxScaleFactor;
+	const defaultScaleFactor = parseInt(
+		(currentRoute.query["scale-factor"] as string) ?? maxScaleFactor
+	);
 	const scaleFactor = ref(defaultScaleFactor);
 
-	const defaultDecimalAccuracy =
-		parseInt(currentRoute.query["decimal-accuracy"] as string) ?? 20;
+	const defaultDecimalAccuracy = parseInt(
+		(currentRoute.query["decimal-accuracy"] as string) ?? 20
+	);
 	const decimalAccuracy = ref(defaultDecimalAccuracy);
 
 	/**
