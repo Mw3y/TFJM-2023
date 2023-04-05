@@ -21,6 +21,9 @@ import { Decimal } from "decimal.js";
 import { setCameraZoomToFitObject } from "./camera";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+const importantConsoleInfoStyle =
+	"font-size: 24px; font-weight: bold; padding: 24px 0";
+
 /**
  * Draws the outline of an object.
  * @param geometry - The object geometry
@@ -103,6 +106,8 @@ export function createIndividualSoundtrack({
 	noteHeight?: Decimal;
 	previousNoteWidth?: Decimal;
 }) {
+	const debugData = [];
+
 	// If there's too many notes, the outline is hidden.
 	const disableNoteOutline = notesNumber >= 500;
 
@@ -133,16 +138,14 @@ export function createIndividualSoundtrack({
 			? new Color(0xffffff)
 			: colors[colorIndex];
 
-		console.log({
-			i,
-			position,
-			noteColor,
-			noteCenterX: noteCenterX.toNumber(),
+		debugData.push({
 			noteX: noteX.toNumber(),
+			noteCenterX: noteCenterX.toNumber(),
 			halfNoteWidth: halfNoteWidth.toNumber(),
 			previousNoteWidth: previousNoteWidth.toNumber(),
 			modulo: noteCenterX.modulo(previousNoteWidth).toNumber(),
 			colorIndex,
+			noteColor: noteColor.getHexString(),
 		});
 
 		// Create the note object
@@ -159,6 +162,13 @@ export function createIndividualSoundtrack({
 		// Save the new color at its index
 		newColors.push(noteColor);
 	}
+
+	console.table(debugData);
+	console.log(
+		"%c⇒ %i blank note(s).",
+		importantConsoleInfoStyle,
+		newColors.filter((color) => color.equals(new Color(0xffffff))).length
+	);
 
 	return { notesRow, newColors };
 }
@@ -177,6 +187,11 @@ export function createSoundtracks(
 
 	const notesRows: Array<Group> = [];
 	for (let i = 0; i < resolutions.length; i++) {
+		console.info("─".repeat(65));
+		console.info(
+			`%cSoundtrack number ${i + 1}:`,
+			importantConsoleInfoStyle
+		);
 		// Calculate the note width based on the resolution of the soundtrack
 		const notesNumber = resolutions[i];
 		const noteWidth: Decimal = new Decimal(
@@ -255,7 +270,13 @@ export function drawSoundtracks(
 	allNotesRows.scale.copy(new Vector3(scaleFactor, scaleFactor, scaleFactor));
 	// Center the camera & change the zoom level
 	centerObject(allNotesRows);
-	setCameraZoomToFitObject(camera, allNotesRows, orbitControls, 2.5, scaleFactor);
+	setCameraZoomToFitObject(
+		camera,
+		allNotesRows,
+		orbitControls,
+		2.5,
+		scaleFactor
+	);
 
 	// Render the notes rows
 	scene.add(allNotesRows);

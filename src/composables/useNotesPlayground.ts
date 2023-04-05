@@ -1,19 +1,18 @@
 import { PerspectiveCamera, Scene } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { Ref, ref, watch } from "vue";
+import { Ref, watch } from "vue";
 import { generateColorPalette, drawSoundtracks } from "../utilities/draw";
-
-export const defaultResolutions = [4, 7];
-export const resolutions = ref(defaultResolutions);
 
 export function useNotesPlayground(
 	scene: Scene,
 	camera: PerspectiveCamera,
 	orbitControls: OrbitControls,
-    scaleFactor: Ref<number>,
-    decimalAccuracy:  Ref<number>
+	resolutions: Ref<number[]>,
+	scaleFactor: Ref<number>,
+	decimalAccuracy: Ref<number>
 ) {
 	let colors = generateColorPalette(Math.max(...resolutions.value));
+	const defaultResolutions = resolutions.value;
 
 	drawSoundtracks(
 		scene,
@@ -44,10 +43,3 @@ export function useNotesPlayground(
 		);
 	});
 }
-
-/**
- * Updates the resolution list
- * @param newResolutions
- */
-export const changeResolutionList = (newResolutions: Array<number>) =>
-	(resolutions.value = newResolutions);

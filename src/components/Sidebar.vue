@@ -5,6 +5,7 @@
 
 	const props = defineProps<{
 		scaleFactorMax: number;
+		defaultScaleFactor: number;
 		defaultDecimalAccuracy: number;
 	}>();
 
@@ -14,7 +15,7 @@
 		(e: "decimalAccuracyChange", value: number): void;
 	}>();
 
-	const scaleFactor = ref(props.scaleFactorMax.toString());
+	const scaleFactor = ref(props.defaultScaleFactor.toString());
 	const scaleFactorLabel = computed(
 		() => "Échelle : " + scaleFactor.value + "%"
 	);
@@ -82,14 +83,21 @@
 			src="/svg/arrow-left.svg"
 		/>
 		<div v-if="!isSidebarHidden" class="flex flex-col gap-4 mb-4">
-			<Input
-				id="resolutions-input"
-				v-model="resolutionsInputContent"
-				:validator="validateResolutionInput"
-				@keydown.tab.prevent="addResolutionSeparator"
-				@submit="handleResolutionsChange"
-			/>
-			<div class="flex flex-col gap-2">
+			<div class="flex flex-col space-y-1">
+				<Input
+					id="resolutions-input"
+					v-model="resolutionsInputContent"
+					:validator="validateResolutionInput"
+					@keydown.tab.prevent="addResolutionSeparator"
+					@submit="handleResolutionsChange"
+				/>
+				<p class="text-neutral-500 text-sm">
+					<strong>Astuce 🛈 :</strong> Appuyer sur TAB pour créer une
+					nouvelle résolution.
+				</p>
+			</div>
+
+			<div class="flex flex-col gap-4">
 				<Range
 					:label="decimalAccuracyLabel"
 					:min="20"
@@ -105,13 +113,24 @@
 					id="scale-selector"
 				/>
 			</div>
+			<p class="text-neutral-500 text-sm">
+				<strong>Astuce 🛈 :</strong> Des informations de débogage telles
+				que le nombre de silences sont disponibles dans la console
+				(touche F12).
+			</p>
 		</div>
 
 		<h3
 			v-if="!isSidebarHidden"
 			class="hidden sm:block text-neutral-500 font-normal text-base leading-5"
 		>
-			Créé par <a class="underline font-medium" href="https://suivix.xyz" target="_blank">Maxence ESPAGNET</a>, TG11, Lycée Pierre-Paul Riquet
+			Créé par
+			<a
+				class="underline font-medium"
+				href="https://suivix.xyz"
+				target="_blank"
+				>Maxence ESPAGNET</a
+			>, TG11, Lycée Pierre-Paul Riquet
 		</h3>
 	</div>
 </template>
