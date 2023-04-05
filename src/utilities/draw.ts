@@ -124,8 +124,10 @@ export function createIndividualSoundtrack({
 		const noteCenterX = noteX.add(halfNoteWidth);
 
 		// Determine if the note falls between two previous notes
-		const modulo = noteCenterX.toNumber() % previousNoteWidth.toNumber();
-		const isModuloNull = modulo == 0;
+		const modulo = noteCenterX.mod(previousNoteWidth);
+		const isModuloNull =
+			modulo.toNumber() === 0 ||
+			modulo.toNumber() === previousNoteWidth.toNumber();
 
 		// Determine the index of the note color
 		const colorIndex = noteCenterX
@@ -216,9 +218,7 @@ export function createSoundtracks(
 		// Save data to create the next row
 		colors = newColors;
 		previousRowWidth = noteWidth.times(notesNumber);
-		previousNoteWidth = new Decimal(getObject3DSize(notesRow).x).dividedBy(
-			notesNumber
-		);
+		previousNoteWidth = new Decimal(resolutions[0]).dividedBy(notesNumber);
 	}
 
 	return notesRows;
