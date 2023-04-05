@@ -5,6 +5,7 @@
 
 	const props = defineProps<{
 		scaleFactorMax: number;
+		defaultResolutions: number[];
 		defaultScaleFactor: number;
 		defaultDecimalAccuracy: number;
 	}>();
@@ -40,7 +41,7 @@
 			.filter((value) => !isNaN(value));
 	});
 
-	const resolutionsInputContent = ref("");
+	const resolutionsInputContent = ref(props.defaultResolutions.join(", "));
 	function handleResolutionsChange() {
 		emit("resolutionChange", resolutions.value);
 	}
@@ -83,7 +84,12 @@
 			src="/svg/arrow-left.svg"
 		/>
 		<div v-if="!isSidebarHidden" class="flex flex-col gap-4 mb-4">
-			<div class="flex flex-col space-y-1">
+			<div class="flex flex-col space-y-2">
+				<p class="text-neutral-500 text-lg font-medium">Résolution(s) :</p>
+				<p class="text-neutral-500 text-sm">
+					<strong>Astuce 🛈 :</strong> Appuyer sur TAB pour créer une
+					nouvelle résolution.
+				</p>
 				<Input
 					id="resolutions-input"
 					v-model="resolutionsInputContent"
@@ -91,10 +97,6 @@
 					@keydown.tab.prevent="addResolutionSeparator"
 					@submit="handleResolutionsChange"
 				/>
-				<p class="text-neutral-500 text-sm">
-					<strong>Astuce 🛈 :</strong> Appuyer sur TAB pour créer une
-					nouvelle résolution.
-				</p>
 			</div>
 
 			<div class="flex flex-col gap-4">

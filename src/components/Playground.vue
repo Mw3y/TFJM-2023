@@ -145,6 +145,7 @@
 		:scaleFactorMax="maxScaleFactor"
 		:defaultScaleFactor="defaultScaleFactor"
 		:defaultDecimalAccuracy="defaultDecimalAccuracy"
+		:defaultResolutions="resolutions"
 	/>
 	<canvas ref="canvas" />
 </template>
