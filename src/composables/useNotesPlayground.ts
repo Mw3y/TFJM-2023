@@ -14,32 +14,26 @@ export function useNotesPlayground(
 	let colors = generateColorPalette(Math.max(...resolutions.value));
 	const defaultResolutions = resolutions.value;
 
-	drawSoundtracks(
-		scene,
-		camera,
-		resolutions.value,
-		colors,
-		scaleFactor.value,
-		decimalAccuracy.value,
-		orbitControls
+	watch(
+		[resolutions, scaleFactor, decimalAccuracy],
+		function () {
+			// Reset the resolution on bad input
+			if (resolutions.value.length < 1) {
+				resolutions.value = defaultResolutions;
+			}
+
+			colors = generateColorPalette(Math.max(...resolutions.value));
+
+			drawSoundtracks(
+				scene,
+				camera,
+				resolutions.value,
+				colors,
+				scaleFactor.value,
+				decimalAccuracy.value,
+				orbitControls
+			);
+		},
+		{ immediate: true }
 	);
-
-	watch([resolutions, scaleFactor, decimalAccuracy], function () {
-		// Reset the resolution on bad input
-		if (resolutions.value.length < 1) {
-			resolutions.value = defaultResolutions;
-		}
-
-		colors = generateColorPalette(Math.max(...resolutions.value));
-
-		drawSoundtracks(
-			scene,
-			camera,
-			resolutions.value,
-			colors,
-			scaleFactor.value,
-			decimalAccuracy.value,
-			orbitControls
-		);
-	});
 }

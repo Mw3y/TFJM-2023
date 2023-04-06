@@ -26,6 +26,9 @@
 	camera.position.set(0, 0, 8);
 	scene.add(camera);
 
+	// The canvas for the images playground
+	const imageCanvas = ref();
+
 	/**
 	 * App settings
 	 */
@@ -133,7 +136,8 @@
 			orbitControls,
 			resolutions,
 			scaleFactor,
-			decimalAccuracy
+			decimalAccuracy,
+			imageCanvas
 		);
 
 		renderer.setAnimationLoop(() => {
@@ -154,5 +158,6 @@
 		:defaultDecimalAccuracy="defaultDecimalAccuracy"
 		:defaultResolutions="resolutions"
 	/>
+	<canvas ref="imageCanvas" class="absolute pixelated" hidden/>
 	<canvas ref="canvas" />
 </template>
