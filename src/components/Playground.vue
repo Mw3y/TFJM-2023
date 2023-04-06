@@ -42,7 +42,7 @@
 
 	const maxDecimalAccuracy = 1e5;
 	const defaultDecimalAccuracy = parseInt(
-		(currentRoute.query["decimal-accuracy"] as string) ?? 100
+		(currentRoute.query["decimal-accuracy"] as string) ?? 1000
 	);
 	const decimalAccuracy = ref(defaultDecimalAccuracy);
 
