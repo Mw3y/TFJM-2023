@@ -34,14 +34,15 @@
 
 	const resolutions = ref(defaultResolutions);
 
-	const maxScaleFactor = 10e6;
+	const maxScaleFactor = 1e6;
 	const defaultScaleFactor = parseInt(
 		(currentRoute.query["scale-factor"] as string) ?? maxScaleFactor
 	);
 	const scaleFactor = ref(defaultScaleFactor);
 
+	const maxDecimalAccuracy = 1e5;
 	const defaultDecimalAccuracy = parseInt(
-		(currentRoute.query["decimal-accuracy"] as string) ?? 20
+		(currentRoute.query["decimal-accuracy"] as string) ?? 100
 	);
 	const decimalAccuracy = ref(defaultDecimalAccuracy);
 
@@ -144,6 +145,7 @@
 		@decimalAccuracyChange.lazy="changeDecimalAccuracy"
 		:scaleFactorMax="maxScaleFactor"
 		:defaultScaleFactor="defaultScaleFactor"
+		:decimalAccuracyMax="maxDecimalAccuracy"
 		:defaultDecimalAccuracy="defaultDecimalAccuracy"
 		:defaultResolutions="resolutions"
 	/>

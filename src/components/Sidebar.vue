@@ -5,8 +5,9 @@
 
 	const props = defineProps<{
 		scaleFactorMax: number;
-		defaultResolutions: number[];
 		defaultScaleFactor: number;
+		defaultResolutions: number[];
+		decimalAccuracyMax: number;
 		defaultDecimalAccuracy: number;
 	}>();
 
@@ -102,8 +103,8 @@
 			<div class="flex flex-col gap-4">
 				<Range
 					:label="decimalAccuracyLabel"
-					:min="20"
-					:max="1e3"
+					:min="100"
+					:max="decimalAccuracyMax"
 					v-model="decimalAccuracy"
 					id="decimal-accuracy"
 				/>
