@@ -8,9 +8,10 @@
 	import Sidebar from "./Sidebar.vue";
 	import { enable2DMovement } from "../utilities/controls";
 	import { useNotesPlayground } from "../composables/useNotesPlayground";
+	import { useImagesPlayground } from "../composables/useImagesPlayground";
 
 	const props = defineProps<{
-		type: "notes" | "images";
+		type: "soundtracks" | "images";
 	}>();
 
 	const router = useRouter();
@@ -122,10 +123,14 @@
 		renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.setSize(width.value, height.value);
 
-		useNotesPlayground(
+		const orbitControls = enable2DMovement(camera, renderer);
+		const usePlayground =
+			props.type === "images" ? useImagesPlayground : useNotesPlayground;
+
+		usePlayground(
 			scene,
 			camera,
-			enable2DMovement(camera, renderer),
+			orbitControls,
 			resolutions,
 			scaleFactor,
 			decimalAccuracy

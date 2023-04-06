@@ -2,7 +2,7 @@
 	import Playground from "../components/Playground.vue";
 
 	const props = defineProps<{
-		type: "notes" | "images";
+		type: "soundtracks" | "images";
 	}>();
 </script>
 

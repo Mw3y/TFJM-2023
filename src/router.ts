@@ -8,7 +8,15 @@ export default createRouter({
 			path: "/playground/soundtracks",
 			component: () => import("./pages/Playground.vue"),
 			props: {
-				type: "notes",
+				type: "soundtracks",
+			},
+		},
+		{
+			name: "ImagessPlayground",
+			path: "/playground/images",
+			component: () => import("./pages/Playground.vue"),
+			props: {
+				type: "images",
 			},
 		},
 		{
