@@ -1,7 +1,7 @@
 {
   "name": "problem_4_vite",
   "private": true,
-  "version": "0.0.0",
+  "version": "12.8.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,6 +16,7 @@
     "vue-router": "4"
   },
   "devDependencies": {
+    "@types/node": "^18.15.11",
     "@types/three": "^0.149.0",
     "@vitejs/plugin-vue": "^4.0.0",
     "autoprefixer": "^10.4.14",

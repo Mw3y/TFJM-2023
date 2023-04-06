@@ -11,6 +11,8 @@
 		defaultDecimalAccuracy: number;
 	}>();
 
+	const version = __APP_VERSION__;
+
 	const emit = defineEmits<{
 		(e: "resolutionChange", value: Array<number>): void;
 		(e: "scaleFactorChange", value: number): void;
@@ -125,7 +127,7 @@
 
 		<h3
 			v-if="!isSidebarHidden"
-			class="hidden sm:block text-neutral-500 font-normal text-base leading-5"
+			class="text-neutral-500 font-normal text-base leading-5"
 		>
 			Créé par
 			<a
@@ -133,7 +135,7 @@
 				href="https://suivix.xyz"
 				target="_blank"
 				>Maxence ESPAGNET</a
-			>, TG11, Lycée Pierre-Paul Riquet
+			>, TG11, Lycée Pierre-Paul Riquet - v.{{ version }}
 		</h3>
 	</div>
 </template>
