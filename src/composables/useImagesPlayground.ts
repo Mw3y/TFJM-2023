@@ -34,6 +34,11 @@ export async function useImagesPlayground(
 	const canvas = imageCanvas.value;
 	const ctx = imageCanvas.value.getContext("2d");
 
+	// Set the canvas size to a multiple of the resolution used
+	// It allows to have whole number pixel size
+	canvas.width = 10 * resolutions.value[0];
+	canvas.height = canvas.width;
+
 	watch(
 		resolutions,
 		async function () {
@@ -43,7 +48,21 @@ export async function useImagesPlayground(
 
 				// ctx.drawImage(croppedImage, 0, 0);
 
-				pixelate(canvas, ctx, croppedImage, resolutions.value[0]);
+				const numberOfPixels = resolutions.value[0];
+				const pixelSize = canvas.width / numberOfPixels;
+				pixelate(canvas, ctx, croppedImage, numberOfPixels);
+
+				const colors = getPixelatedImageColors(
+					ctx,
+					numberOfPixels,
+					pixelSize
+				);
+
+				// for(const row of colors) {
+				// 	for(const color of row) {
+				// 		console.log(color.getHexString())
+				// 	}
+				// }
 
 				const texture = new CanvasTexture(canvas);
 				const material = new SpriteMaterial({
@@ -58,6 +77,36 @@ export async function useImagesPlayground(
 		},
 		{ immediate: true }
 	);
+}
+
+/**
+ * Convert a pixelated image to an array of colors.
+ * @param ctx 
+ * @param numberOfPixels - The number of pixels to fit on a side
+ * @param pixelSize - The size of a pixel
+ * @returns An array of color arrays.
+ */
+function getPixelatedImageColors(
+	ctx: CanvasRenderingContext2D,
+	numberOfPixels: number,
+	pixelSize: number
+) {
+	const pixelColors: Array<Color[]> = [];
+	for (let i = 0; i < numberOfPixels; i++) {
+		const rowPixelColors = [];
+		for (let j = 0; j < numberOfPixels; j++) {
+			const { data } = ctx.getImageData(
+				j * pixelSize,
+				i * pixelSize,
+				pixelSize,
+				pixelSize
+			);
+
+			rowPixelColors.push(new Color(`rgb(${data[0]}, ${data[1]}, ${data[2]})`));
+		}
+		pixelColors.push(rowPixelColors);
+	}
+	return pixelColors;
 }
 
 /**
@@ -88,8 +137,8 @@ function pixelate(
 	pixelNumber: number = 24
 ) {
 	// Dynamically adjust canvas size to the size of the uploaded image
-	canvas.height = image.height;
-	canvas.width = image.width;
+	// canvas.height = image.height;
+	// canvas.width = image.width;
 
 	// Prevent the upscale of an image.
 	// TODO: Upscale algorithm
