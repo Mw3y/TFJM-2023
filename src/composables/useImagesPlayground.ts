@@ -159,8 +159,8 @@ function createFittedInCanvasImage({
 	image,
 	x = 0,
 	y = 0,
-	width,
-	height,
+	width = canvas.width,
+	height = canvas.height,
 	offsetX = 0.5,
 	offsetY = 0.5,
 }: {
@@ -168,17 +168,11 @@ function createFittedInCanvasImage({
 	image: HTMLImageElement;
 	x?: number;
 	y?: number;
-	width: number;
-	height: number;
+	width?: number;
+	height?: number;
 	offsetX?: number;
 	offsetY?: number;
 }) {
-	if (arguments.length === 2) {
-		x = y = 0;
-		width = canvas.width;
-		height = canvas.height;
-	}
-
 	// Keep bounds [0.0, 1.0]
 	offsetX = clamp(offsetX, 0, 1);
 	offsetY = clamp(offsetY, 0, 1);
