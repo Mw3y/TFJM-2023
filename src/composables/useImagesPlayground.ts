@@ -6,6 +6,9 @@ import { centerObject, createRectangleObject } from "../utilities/draw";
 import { setCameraZoomToFitObject } from "../utilities/camera";
 import { Decimal } from "decimal.js";
 
+const importantConsoleInfoStyle =
+	"font-size: 24px; font-weight: bold; padding: 24px 0";
+
 /**
  * Returns a number whose value is limited to the given range.
  *
@@ -77,7 +80,7 @@ export function createImagePixelRow({
 	previousPixelWidth: Decimal;
 	previousPixelHeight: Decimal;
 }) {
-
+	const debugData = [];
 	// If there's too many pixels, the outline is hidden.
 	const disableNoteOutline = xResolution >= 100 || yResolution >= 100;
 
@@ -85,59 +88,92 @@ export function createImagePixelRow({
 	const newColors = new Array<Color>();
 
 	// Create the pixel mesh and outline for each note
-	for (let i = 0; i < xResolution * yResolution; i++) {
-		// The position of the pixel
-		const pixelX = pixelWidth.times(i);
-		const pixelY = pixelHeight.times(i);
-		const position = new Vector3(pixelX.toNumber(), 0, 0);
+	// Iterate over each row of the pixelated image
+	for (let i = 0; i < yResolution; i++) {
+		// Iterate over each pixel of the row
+		for (let j = 0; j < xResolution; j++) {
+			// The position of the pixel
+			const pixelX = pixelWidth.times(j);
+			const pixelY = pixelHeight.times(i);
+			const position = new Vector3(
+				pixelX.toNumber(),
+				pixelY.toNumber(),
+				0
+			);
 
-		const halfPixelWidth = pixelWidth.dividedBy(2);
-		const halfPixelHeight = pixelHeight.dividedBy(2);
-		const pixelCenterX = pixelX.add(halfPixelWidth);
-		const pixelCenterY = pixelY.add(halfPixelHeight);
+			const halfPixelWidth = pixelWidth.dividedBy(2);
+			const halfPixelHeight = pixelHeight.dividedBy(2);
+			const pixelCenterX = pixelX.add(halfPixelWidth);
+			const pixelCenterY = pixelY.add(halfPixelHeight);
 
-		// Determine if the pixel falls between two previous pixels
-		const xAxisModulo = pixelCenterX.mod(previousPixelWidth);
-		const yAxisModulo = pixelCenterY.mod(previousPixelHeight);
+			// Determine if the pixel falls between two previous pixels
+			const xAxisModulo = pixelCenterX.mod(previousPixelWidth);
+			const yAxisModulo = pixelCenterY.mod(previousPixelHeight);
 
-		const isXModuloNull =
-			xAxisModulo.toNumber() === 0 ||
-			xAxisModulo.toNumber() === previousPixelWidth.toNumber();
-		const isYModuloNull =
-			yAxisModulo.toNumber() === 0 ||
-			yAxisModulo.toNumber() === previousPixelHeight.toNumber();
+			const isXModuloNull =
+				xAxisModulo.toNumber() === 0 ||
+				xAxisModulo.toNumber() === previousPixelWidth.toNumber();
 
-		const isModuloNull = isXModuloNull || isYModuloNull;
+			const isYModuloNull =
+				yAxisModulo.toNumber() === 0 ||
+				yAxisModulo.toNumber() === previousPixelHeight.toNumber();
 
-		// Determine the index of the pixel color
-		const xAxisColorIndex = pixelCenterX
-			.dividedToIntegerBy(previousPixelWidth)
-			.toNumber();
+			const isModuloNull = isXModuloNull || isYModuloNull;
 
-		const yAxisColorIndex = pixelCenterY
-			.dividedToIntegerBy(previousPixelHeight)
-			.toNumber();
+			// Determine the index of the pixel color
+			const xAxisColorIndex = pixelCenterX
+				.dividedToIntegerBy(previousPixelWidth)
+				.toNumber();
 
-		// If the pixel center falls between two previous pixels, it is deleted and colored black.
-		// Otherwise, its color is based on the color of the previous pixel that it center falls within.
-		const noteColor = isModuloNull
-			? new Color(0xffffff)
-			: colors[yAxisColorIndex][xAxisColorIndex];
+			const yAxisColorIndex = pixelCenterY
+				.dividedToIntegerBy(previousPixelHeight)
+				.toNumber();
 
-		// Create the pixel object
-		const { mesh, outline } = createRectangleObject(
-			position,
-			noteColor,
-			pixelWidth.toNumber(),
-			pixelHeight.toNumber(),
-			disableNoteOutline
-		);
+			// If the pixel center falls between two previous pixels, it is deleted and colored black.
+			// Otherwise, its color is based on the color of the previous pixel that it center falls within.
+			const pixelColor = isModuloNull
+				? new Color(0x000000)
+				: colors[yAxisColorIndex]?.[xAxisColorIndex];
 
-		// Add the generated pixel components to the row
-		pixelsRow.add(mesh, outline);
-		// Save the new color at its index
-		newColors.push(noteColor);
+			// Create the pixel object
+			const { mesh, outline } = createRectangleObject(
+				position,
+				pixelColor,
+				pixelWidth.toNumber(),
+				pixelHeight.toNumber(),
+				disableNoteOutline
+			);
+
+			// Add the generated pixel components to the row
+			pixelsRow.add(mesh, outline);
+			// Save the new color at its index
+			newColors.push(pixelColor);
+
+			debugData.push({
+				pixelX: pixelX.toNumber(),
+				pixelY: pixelY.toNumber(),
+				pixelCenterX: pixelCenterX.toNumber(),
+				pixelCenterY: pixelCenterY.toNumber(),
+				halfPixelWidth: halfPixelWidth.toNumber(),
+				halfPixelHeight: halfPixelHeight.toNumber(),
+				previousPixelWidth: previousPixelWidth.toNumber(),
+				previousPixelHeight: previousPixelHeight.toNumber(),
+				xAxisModulo: xAxisModulo.toNumber(),
+				yAxisModulo: yAxisModulo.toNumber(),
+				isModuloNull: isModuloNull,
+				xAxisColorIndex: xAxisColorIndex,
+				yAxisColorIndex: yAxisColorIndex,
+				noteColor: pixelColor.getHexString(),
+			});
+		}
 	}
+
+	console.table(debugData)
+	console.log(
+		"%c⇒ %i black pixel(s).",
+		importantConsoleInfoStyle,
+		newColors.filter((color) => color.equals(new Color(0x000000))).length
+	);
 
 	return { pixelsRow, newColors };
 }
@@ -238,16 +274,42 @@ async function drawPixelatedImage({
 	);
 
 	// Create the pixelated image Threejs object
-	const pixelatedImage = createPixelatedImageObject(
-		pixelColors,
-		orthonormalFactor
-	);
+		const { pixelsRow: pixelatedImage } = createImagePixelRow({
+		xResolution: xResolution,
+		yResolution: yResolution,
+		colors: pixelColors,
+		pixelWidth: new Decimal(canvas.width).dividedBy(xResolution),
+		pixelHeight: new Decimal(canvas.height).dividedBy(yResolution),
+		previousPixelWidth: new Decimal(xAxisPixelSize),
+		previousPixelHeight: new Decimal(yAxisPixelSize),
+	});
 
 	// Center the camera & change the zoom level
 	centerObject(pixelatedImage);
 	setCameraZoomToFitObject(camera, pixelatedImage, orbitControls, 2.5);
 
-	scene.add(pixelatedImage);
+	// scene.add(pixelatedImage);
+
+	const newResolution = [13, 13];
+	const newPixelatedImage = createImagePixelRow({
+		xResolution: newResolution[0],
+		yResolution: newResolution[1],
+		colors: pixelColors,
+		pixelWidth: new Decimal(canvas.width).dividedBy(newResolution[0]),
+		pixelHeight: new Decimal(canvas.height).dividedBy(newResolution[1]),
+		previousPixelWidth: new Decimal(xAxisPixelSize),
+		previousPixelHeight: new Decimal(yAxisPixelSize),
+	});
+
+	scene.add(newPixelatedImage.pixelsRow);
+
+	centerObject(newPixelatedImage.pixelsRow);
+	setCameraZoomToFitObject(
+		camera,
+		newPixelatedImage.pixelsRow,
+		orbitControls,
+		2.5
+	);
 }
 
 /**
