@@ -11,12 +11,14 @@
   "dependencies": {
     "@vueuse/core": "^9.13.0",
     "decimal.js": "^10.4.3",
+    "randomcolor": "^0.6.2",
     "three": "^0.150.1",
     "vue": "^3.2.45",
     "vue-router": "4"
   },
   "devDependencies": {
     "@types/node": "^18.15.11",
+    "@types/randomcolor": "^0.5.7",
     "@types/three": "^0.149.0",
     "@vitejs/plugin-vue": "^4.0.0",
     "autoprefixer": "^10.4.14",

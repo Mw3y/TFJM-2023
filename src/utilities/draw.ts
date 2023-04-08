@@ -21,6 +21,8 @@ import { Decimal } from "decimal.js";
 import { setCameraZoomToFitObject } from "./camera";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+import randomColor from "randomcolor";
+
 const importantConsoleInfoStyle =
 	"font-size: 24px; font-weight: bold; padding: 24px 0";
 
@@ -282,32 +284,6 @@ export function drawSoundtracks(
 	scene.add(allNotesRows);
 }
 
-export function generateColorPalette(maxResolution: number) {
-	const colors = [
-		new Color(0x009fe3),
-		new Color(0x80cff1),
-		new Color(0xea5e00),
-		new Color(0xf4af80),
-		// new Color(0x3d405b),
-		// new Color(0x5f6178),
-		new Color(0xd32b51),
-		new Color(0xb74083),
-		new Color(0x845a9f),
-		new Color(0x3f517d),
-		new Color(0x386982),
-		new Color(0x038cb7),
-		new Color(0x00a0a4),
-		new Color(0x00a578),
-		new Color(0x2c9d13),
-		new Color(0xc49d0a),
-	];
-
-	while (colors.length < maxResolution) {
-		colors.push(...colors);
-	}
-
-	return colors;
-}
 /**
  * Calculates the size of a 3D object.
  * @param object - The object to get the size of

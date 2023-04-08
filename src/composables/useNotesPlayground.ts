@@ -1,7 +1,8 @@
 import { PerspectiveCamera, Scene } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Ref, watch } from "vue";
-import { generateColorPalette, drawSoundtracks } from "../utilities/draw";
+import { drawSoundtracks } from "../utilities/draw";
+import { generateColorPalette} from "../utilities/colors";
 
 export function useNotesPlayground(
 	scene: Scene,
