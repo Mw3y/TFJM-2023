@@ -168,7 +168,7 @@ export function createImagePixelRow({
 		}
 	}
 
-	console.table(debugData)
+	console.table(debugData);
 	console.log(
 		"%c⇒ %i black pixel(s).",
 		importantConsoleInfoStyle,
@@ -274,7 +274,7 @@ async function drawPixelatedImage({
 	);
 
 	// Create the pixelated image Threejs object
-		const { pixelsRow: pixelatedImage } = createImagePixelRow({
+	const { pixelsRow: pixelatedImage } = createImagePixelRow({
 		xResolution: xResolution,
 		yResolution: yResolution,
 		colors: pixelColors,
