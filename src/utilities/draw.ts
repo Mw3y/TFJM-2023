@@ -21,8 +21,6 @@ import { Decimal } from "decimal.js";
 import { setCameraZoomToFitObject } from "./camera";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-import randomColor from "randomcolor";
-
 const importantConsoleInfoStyle =
 	"font-size: 24px; font-weight: bold; padding: 24px 0";
 
@@ -38,25 +36,25 @@ export function createObjectOutline(geometry: PlaneGeometry, color: Color) {
 }
 
 /**
- * Creates a new note mesh and its outline.
- * The note is centered at the given position.
+ * Creates a new rectangle mesh and its outline.
+ * The rectangle is centered at the given position.
  *
  * @example
- * const noteObject = createNoteObject(new Vector3(0, 0, 0))
+ * const noteObject = createRectangleObject(new Vector3(0, 0, 0))
  *
  * @param position - The position of the center of the note
  * @param width - The width of the note
  * @param height - The height of the note
  * @return { Array } An array with the note mesh and the outline.
  */
-export function createNoteObject(
+export function createRectangleObject(
 	position: Vector3,
 	color: Color = new Color(Math.random() * 0xffffff),
 	width: number = 1,
 	height: number = 1,
 	disableOutline: boolean = false
 ) {
-	// Create the mesh of a new note
+	// Create the mesh of the rectangle
 	const noteMesh = new Mesh(
 		new PlaneGeometry(width, height, 1, 1),
 		new MeshBasicMaterial({
@@ -64,7 +62,7 @@ export function createNoteObject(
 		})
 	);
 
-	// Draw the outline of the note
+	// Create the outline of the rectangle
 	const outline = createObjectOutline(
 		noteMesh.geometry,
 		// If disableOutline is set to true, the outline is not visible
@@ -72,7 +70,7 @@ export function createNoteObject(
 		disableOutline ? color : new Color(0x000000)
 	);
 
-	// Set the note & outline position
+	// Set the quadrilateral & outline position
 	noteMesh.position.copy(position);
 	outline.position.copy(position);
 
@@ -153,7 +151,7 @@ export function createIndividualSoundtrack({
 		});
 
 		// Create the note object
-		const [noteMesh, noteOutline] = createNoteObject(
+		const [noteMesh, noteOutline] = createRectangleObject(
 			position,
 			noteColor,
 			noteWidth.toNumber(),

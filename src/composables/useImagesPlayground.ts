@@ -1,21 +1,21 @@
-import {
-	CanvasTexture,
-	Color,
-	DoubleSide,
-	Group,
-	Mesh,
-	MeshBasicMaterial,
-	PerspectiveCamera,
-	Scene,
-	ShapeGeometry,
-	Sprite,
-	SpriteMaterial,
-	TextureLoader,
-} from "three";
+import { Color, Group, PerspectiveCamera, Scene, Vector3 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader";
 
 import { Ref, watch } from "vue";
+import { centerObject, createRectangleObject } from "../utilities/draw";
+import { setCameraZoomToFitObject } from "../utilities/camera";
+
+/**
+ * Returns a number whose value is limited to the given range.
+ *
+ * @param value The value to fit within the range
+ * @param min The lower boundary of the output range
+ * @param max The upper boundary of the output range
+ * @returns A number in the range [min, max]
+ */
+const clamp = function (value: number, min: number, max: number) {
+	return Math.min(Math.max(value, min), max);
+};
 
 export async function useImagesPlayground(
 	scene: Scene,
@@ -23,86 +23,247 @@ export async function useImagesPlayground(
 	orbitControls: OrbitControls,
 	resolutions: Ref<number[]>,
 	scaleFactor: Ref<number>,
-	decimalAccuracy: Ref<number>,
-	imageCanvas: Ref<HTMLCanvasElement>
+	decimalAccuracy: Ref<number>
 ) {
-	// const svgImage = createSVGImage(
-	// 	"https://threejs.org/examples/models/svg/tiger.svg"
-	// );
-	// scene.add(svgImage);
-
-	const canvas = imageCanvas.value;
-	const ctx = imageCanvas.value.getContext("2d");
-
-	// Set the canvas size to a multiple of the resolution used
-	// It allows to have whole number pixel size
-	canvas.width = 10 * resolutions.value[0];
-	canvas.height = canvas.width;
+	const resolution = [28, 28];
 
 	watch(
-		resolutions,
+		[resolutions, scaleFactor, decimalAccuracy],
 		async function () {
-			if (ctx) {
-				const image = await createImage("/images/mona_lisa.jpg");
-				const croppedImage = await createImage(crop(image).toDataURL());
+			const image = await createImage("/images/mona_lisa.jpg");
 
-				// ctx.drawImage(croppedImage, 0, 0);
-
-				const numberOfPixels = resolutions.value[0];
-				const pixelSize = canvas.width / numberOfPixels;
-				pixelate(canvas, ctx, croppedImage, numberOfPixels);
-
-				const colors = getPixelatedImageColors(
-					ctx,
-					numberOfPixels,
-					pixelSize
-				);
-
-				// for(const row of colors) {
-				// 	for(const color of row) {
-				// 		console.log(color.getHexString())
-				// 	}
-				// }
-
-				const texture = new CanvasTexture(canvas);
-				const material = new SpriteMaterial({
-					map: texture,
-					color: 0xffffff,
-				});
-				const sprite = new Sprite(material);
-
-				sprite.scale.set(2.5, 2.5, 1);
-				scene.add(sprite);
-			}
+			await drawPixelatedImage({
+				scene: scene,
+				camera: camera,
+				orbitControls: orbitControls,
+				xResolution: resolution[0],
+				yResolution: resolution[1],
+				image: image,
+			});
 		},
 		{ immediate: true }
 	);
 }
 
 /**
- * Convert a pixelated image to an array of colors.
- * @param ctx 
+ * Creates a pixelated image as described in the statement of the problem.
+ * @param pixelColors - Array containing the pixels of each row
+ * @return The group object containing all of the pixels.
+ */
+function createPixelatedImageObject(pixelColors: Array<Color[]>) {
+	const pixelatedImage = new Group();
+	// Iterate over each row of the pixelated image
+	for (let i = 0; i < pixelColors.length; i++) {
+		// Iterate over each pixel of the row
+		const rowPixelsGroup = new Group();
+		for (let j = 0; j < pixelColors[i].length; j++) {
+			const pixel = createRectangleObject(
+				new Vector3(j, i),
+				pixelColors[i][j]
+			);
+			rowPixelsGroup.add(...pixel);
+		}
+		pixelatedImage.add(rowPixelsGroup);
+	}
+
+	return pixelatedImage;
+}
+
+async function drawPixelatedImage({
+	scene,
+	camera,
+	orbitControls,
+	xResolution,
+	yResolution,
+	image,
+}: {
+	scene: Scene;
+	camera: PerspectiveCamera;
+	orbitControls: OrbitControls;
+	xResolution: number;
+	yResolution: number;
+	image: HTMLImageElement;
+}) {
+	const canvas = document.createElement("canvas");
+	const ctx = canvas.getContext("2d", {
+		willReadFrequently: true,
+	});
+
+	if (!ctx) {
+		return;
+	}
+
+	// Set the canvas size to a multiple of the resolution used
+	// It allows to have whole number pixel size
+	// TODO: Add scalefactor
+	canvas.width = xResolution * 100;
+	canvas.height = yResolution * 100;
+
+	const numberOfXAxisPixels = xResolution;
+	const numberOfYAxisPixels = yResolution;
+
+	const xAxisPixelSize = canvas.width / numberOfXAxisPixels;
+	const yAxisPixelSize = canvas.height / numberOfYAxisPixels;
+
+	// Make the image fit in a xResolution * yResolution canvas
+	const fittedImage = await createImage(
+		createFittedInCanvasImage({
+			canvas,
+			image,
+			width: canvas.width,
+			height: canvas.height,
+			offsetX: 0,
+			offsetY: 0,
+		})
+	);
+
+	pixelateCanvasImage(
+		canvas,
+		ctx,
+		fittedImage,
+		numberOfXAxisPixels,
+		numberOfYAxisPixels
+	);
+
+	const pixelColors = extractPixelatedImageColors(
+		ctx,
+		numberOfXAxisPixels,
+		numberOfYAxisPixels,
+		xAxisPixelSize,
+		yAxisPixelSize
+	);
+
+	// Create the pixelated image Threejs object
+	const pixelatedImage = createPixelatedImageObject(pixelColors);
+
+	// Center the camera & change the zoom level
+	centerObject(pixelatedImage);
+	setCameraZoomToFitObject(camera, pixelatedImage, orbitControls, 2.5);
+
+	scene.add(pixelatedImage);
+}
+
+/**
+ * By Ken Fyrstenberg Nilsen
+ *
+ * If image and context are the only arguments, the rectangle will equal the canvas.
+ *
+ * @example
+ *
+ * ```js
+ * createFittedInCanvasImage({canvas, image, x, y, width, height, offsetX, offsetY})
+ * ```
+ */
+function createFittedInCanvasImage({
+	canvas,
+	image,
+	x = 0,
+	y = 0,
+	width,
+	height,
+	offsetX = 0.5,
+	offsetY = 0.5,
+}: {
+	canvas: HTMLCanvasElement;
+	image: HTMLImageElement;
+	x?: number;
+	y?: number;
+	width: number;
+	height: number;
+	offsetX?: number;
+	offsetY?: number;
+}) {
+	if (arguments.length === 2) {
+		x = y = 0;
+		width = canvas.width;
+		height = canvas.height;
+	}
+
+	// Keep bounds [0.0, 1.0]
+	offsetX = clamp(offsetX, 0, 1);
+	offsetY = clamp(offsetY, 0, 1);
+
+	var iw = image.width,
+		ih = image.height,
+		r = Math.min(width / iw, height / ih),
+		nw = iw * r, // new prop. width
+		nh = ih * r, // new prop. height
+		cx,
+		cy,
+		cw,
+		ch,
+		ar = 1;
+
+	// Decide which gap to fill
+	if (nw < width) ar = width / nw;
+	if (Math.abs(ar - 1) < 1e-14 && nh < height) ar = height / nh; // updated
+	nw *= ar;
+	nh *= ar;
+
+	// Calculate source rectangle
+	cw = iw / (nw / width);
+	ch = ih / (nh / height);
+
+	cx = (iw - cw) * offsetX;
+	cy = (ih - ch) * offsetY;
+
+	// Make sure source rectangle is valid
+	if (cx < 0) cx = 0;
+	if (cy < 0) cy = 0;
+	if (cw > iw) cw = iw;
+	if (ch > ih) ch = ih;
+
+	// Create a canvas that will present the output image
+	const outputImage = document.createElement("canvas");
+
+	// Set it to the same size as the image
+	outputImage.width = width;
+	outputImage.height = height;
+
+	// Draw the image at position 0, 0 on the canvas
+	const ctx = outputImage.getContext("2d");
+	ctx?.drawImage(image, cx, cy, cw, ch, x, y, width, height);
+
+	return outputImage.toDataURL();
+}
+
+/**
+ * Converts a pixelated image to an array of colors.
+ * @param ctx
  * @param numberOfPixels - The number of pixels to fit on a side
  * @param pixelSize - The size of a pixel
  * @returns An array of color arrays.
  */
-function getPixelatedImageColors(
+function extractPixelatedImageColors(
 	ctx: CanvasRenderingContext2D,
-	numberOfPixels: number,
-	pixelSize: number
+	numberOfXAxisPixels: number,
+	numberOfYAxisPixels: number,
+	xAxisPixelSize: number,
+	yAxisPixelSize: number
 ) {
-	const pixelColors: Array<Color[]> = [];
-	for (let i = 0; i < numberOfPixels; i++) {
+	const pixelColors: Array<Color[]> = new Array();
+	// Iterate over each row of the pixelated image
+	for (let i = 1; i <= numberOfYAxisPixels; i++) {
 		const rowPixelColors = [];
-		for (let j = 0; j < numberOfPixels; j++) {
+		// Iterate over each pixel of the row
+		for (let j = 0; j < numberOfXAxisPixels; j++) {
+			// Get the color data of the pixel
 			const { data } = ctx.getImageData(
-				j * pixelSize,
-				i * pixelSize,
-				pixelSize,
-				pixelSize
+				// Calculate the pixel x axis coordinate
+				j * xAxisPixelSize,
+				// Calculate the pixel y axis coordinate
+				ctx.canvas.height - i * yAxisPixelSize,
+				// The size of the pixel
+				xAxisPixelSize,
+				yAxisPixelSize
 			);
 
-			rowPixelColors.push(new Color(`rgb(${data[0]}, ${data[1]}, ${data[2]})`));
+			const alpha = data[3] / 255;
+			const color = new Color(`rgb(${data[0]}, ${data[1]}, ${data[2]})`);
+			// The lerp() method is used to lighten the color based on its alpha value
+			// It allows to manually adjust the opacity since there is not alpha support available
+			// Here, 0xffffff is the background color
+			rowPixelColors.push(color.lerp(new Color(0xffffff), 1 - alpha));
 		}
 		pixelColors.push(rowPixelColors);
 	}
@@ -128,13 +289,15 @@ async function createImage(src: string): Promise<HTMLImageElement> {
  * @param canvas
  * @param ctx
  * @param image - The image to be pixelated
- * @param pixelNumber - The number of pixels on one side of the output image.
+ * @param numberOfXAxisPixels - The number of pixels on the X axis of the output image.
+ * @param numberOfYAxisPixels - The number of pixels on the Y axis of the output image.
  */
-function pixelate(
+function pixelateCanvasImage(
 	canvas: HTMLCanvasElement,
 	ctx: CanvasRenderingContext2D,
 	image: HTMLImageElement,
-	pixelNumber: number = 24
+	numberOfXAxisPixels: number,
+	numberOfYAxisPixels: number
 ) {
 	// Dynamically adjust canvas size to the size of the uploaded image
 	// canvas.height = image.height;
@@ -142,15 +305,20 @@ function pixelate(
 
 	// Prevent the upscale of an image.
 	// TODO: Upscale algorithm
-	if (pixelNumber > image.width) {
-		pixelNumber = image.width;
+	if (numberOfXAxisPixels > image.width) {
+		numberOfXAxisPixels = image.width;
+	}
+
+	if (numberOfYAxisPixels > image.height) {
+		numberOfYAxisPixels = image.height;
 	}
 
 	// The size represents the size of one pixel of the pixelated image
-	const size = pixelNumber / canvas.width,
+	const xSize = numberOfXAxisPixels / canvas.width,
+		ySize = numberOfYAxisPixels / canvas.height,
 		// Cache scaled width and height
-		w = canvas.width * size,
-		h = canvas.height * size;
+		w = canvas.width * xSize,
+		h = canvas.height * ySize;
 
 	// Draw original image to the scaled size
 	ctx.drawImage(image, 0, 0, w, h);
@@ -195,94 +363,5 @@ function crop(image: HTMLImageElement, outputImageAspectRatio = 1) {
 	const ctx = outputImage.getContext("2d");
 	ctx?.drawImage(image, 0, 0);
 
-	return outputImage;
-}
-
-/**
- * Creates a group containing all the object of a given svg file.
- * @param url - The url to get the svg file from
- * @return All of the objects of the given svg file
- */
-export function createSVGImage(url: string) {
-	// https://threejs.org/examples/models/svg/tiger.svg
-	const group = new Group();
-
-	new SVGLoader().load(url, function (data) {
-		const paths = data.paths;
-
-		group.scale.multiplyScalar(0.25);
-		group.position.x = -70;
-		group.position.y = 70;
-		group.scale.y *= -1;
-
-		const drawStrokes = true;
-		const drawFillShapes = true;
-		const fillShapesWireframe = false;
-		const strokesWireframe = false;
-
-		for (let i = 0; i < paths.length; i++) {
-			const path = paths[i];
-
-			const fillColor = path.userData?.style.fill;
-			if (
-				drawFillShapes &&
-				fillColor !== undefined &&
-				fillColor !== "none"
-			) {
-				const material = new MeshBasicMaterial({
-					color: new Color().setStyle(fillColor),
-					opacity: path.userData?.style.fillOpacity,
-					transparent: true,
-					side: DoubleSide,
-					depthWrite: false,
-					wireframe: fillShapesWireframe,
-				});
-
-				const shapes = SVGLoader.createShapes(path);
-
-				for (let j = 0; j < shapes.length; j++) {
-					const shape = shapes[j];
-
-					const geometry = new ShapeGeometry(shape);
-					const mesh = new Mesh(geometry, material);
-
-					group.add(mesh);
-				}
-			}
-
-			const strokeColor = path.userData?.style.stroke;
-			if (
-				drawStrokes &&
-				strokeColor !== undefined &&
-				strokeColor !== "none"
-			) {
-				const material = new MeshBasicMaterial({
-					color: new Color()
-						.setStyle(strokeColor)
-						.convertSRGBToLinear(),
-					opacity: path.userData?.style.strokeOpacity,
-					transparent: true,
-					side: DoubleSide,
-					depthWrite: false,
-					wireframe: strokesWireframe,
-				});
-
-				for (let j = 0, jl = path.subPaths.length; j < jl; j++) {
-					const subPath = path.subPaths[j];
-
-					const geometry = SVGLoader.pointsToStroke(
-						subPath.getPoints(),
-						path.userData?.style
-					);
-
-					if (geometry) {
-						const mesh = new Mesh(geometry, material);
-
-						group.add(mesh);
-					}
-				}
-			}
-		}
-	});
-	return group;
+	return outputImage.toDataURL();
 }

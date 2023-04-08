@@ -137,7 +137,6 @@
 			resolutions,
 			scaleFactor,
 			decimalAccuracy,
-			imageCanvas
 		);
 
 		renderer.setAnimationLoop(() => {
@@ -158,6 +157,11 @@
 		:defaultDecimalAccuracy="defaultDecimalAccuracy"
 		:defaultResolutions="resolutions"
 	/>
-	<canvas ref="imageCanvas" class="absolute pixelated" hidden/>
+	<!-- Used to debug the image pixelation -->
+	<!-- <canvas
+		hidden
+		ref="imageCanvas"
+		class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pixelated"
+	/> -->
 	<canvas ref="canvas" />
 </template>
