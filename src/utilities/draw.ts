@@ -55,8 +55,8 @@ export function createRectangleObject(
 	disableOutline: boolean = false
 ) {
 	// Create the mesh of the rectangle
-	const noteMesh = new Mesh(
-		new PlaneGeometry(width, height, 1, 1),
+	const mesh = new Mesh(
+		new PlaneGeometry(width, height),
 		new MeshBasicMaterial({
 			color,
 		})
@@ -64,17 +64,17 @@ export function createRectangleObject(
 
 	// Create the outline of the rectangle
 	const outline = createObjectOutline(
-		noteMesh.geometry,
+		mesh.geometry,
 		// If disableOutline is set to true, the outline is not visible
 		// since it is set to the same color as the plane geometry.
 		disableOutline ? color : new Color(0x000000)
 	);
 
 	// Set the quadrilateral & outline position
-	noteMesh.position.copy(position);
+	mesh.position.copy(position);
 	outline.position.copy(position);
 
-	return [noteMesh, outline];
+	return { mesh, outline };
 }
 
 /**
@@ -151,7 +151,7 @@ export function createIndividualSoundtrack({
 		});
 
 		// Create the note object
-		const [noteMesh, noteOutline] = createRectangleObject(
+		const { mesh, outline} = createRectangleObject(
 			position,
 			noteColor,
 			noteWidth.toNumber(),
@@ -160,7 +160,7 @@ export function createIndividualSoundtrack({
 		);
 
 		// Add the generated note components to the row
-		notesRow.add(noteMesh, noteOutline);
+		notesRow.add(mesh, outline);
 		// Save the new color at its index
 		newColors.push(noteColor);
 	}

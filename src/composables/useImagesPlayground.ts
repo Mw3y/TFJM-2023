@@ -4,6 +4,7 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Ref, watch } from "vue";
 import { centerObject, createRectangleObject } from "../utilities/draw";
 import { setCameraZoomToFitObject } from "../utilities/camera";
+import { Decimal } from "decimal.js";
 
 /**
  * Returns a number whose value is limited to the given range.
@@ -46,22 +47,123 @@ export async function useImagesPlayground(
 }
 
 /**
+ * Creates a row of pixels as described in the statement of the problem.
+ *
+ * @param params
+ * @param params.notesNumber
+ * @param params.colors
+ * @param params.rowOffset
+ * @param params.noteWidth
+ * @param params.noteHeight
+ * @param params.previousNoteWidth
+ * @param params.verticalAxisMargin
+ *
+ * @return { Group } The group object containing all of the pixels.
+ */
+export function createImagePixelRow({
+	xResolution,
+	yResolution,
+	colors,
+	pixelWidth,
+	pixelHeight,
+	previousPixelWidth,
+	previousPixelHeight,
+}: {
+	xResolution: number;
+	yResolution: number;
+	colors: Array<Array<Color>>;
+	pixelWidth: Decimal;
+	pixelHeight: Decimal;
+	previousPixelWidth: Decimal;
+	previousPixelHeight: Decimal;
+}) {
+
+	// If there's too many notes, the outline is hidden.
+	const disableNoteOutline = xResolution >= 100 || yResolution >= 100;
+
+	const pixelsRow = new Group();
+	const newColors = new Array<Color>();
+
+	// Create the note mesh and outline for each note
+	for (let i = 0; i < xResolution * yResolution; i++) {
+		// The position of the note
+		const pixelX = pixelWidth.times(i);
+		const pixelY = pixelHeight.times(i);
+		const position = new Vector3(pixelX.toNumber(), 0, 0);
+
+		const halfPixelWidth = pixelWidth.dividedBy(2);
+		const halfPixelHeight = pixelHeight.dividedBy(2);
+		const pixelCenterX = pixelX.add(halfPixelWidth);
+		const pixelCenterY = pixelY.add(halfPixelHeight);
+
+		// Determine if the note falls between two previous notes
+		const xAxisModulo = pixelCenterX.mod(previousPixelWidth);
+		const yAxisModulo = pixelCenterY.mod(previousPixelHeight);
+
+		const isXModuloNull =
+			xAxisModulo.toNumber() === 0 ||
+			xAxisModulo.toNumber() === previousPixelWidth.toNumber();
+		const isYModuloNull =
+			yAxisModulo.toNumber() === 0 ||
+			yAxisModulo.toNumber() === previousPixelHeight.toNumber();
+
+		const isModuloNull = isXModuloNull || isYModuloNull;
+
+		// Determine the index of the note color
+		const xAxisColorIndex = pixelCenterX
+			.dividedToIntegerBy(previousPixelWidth)
+			.toNumber();
+
+		const yAxisColorIndex = pixelCenterY
+			.dividedToIntegerBy(previousPixelHeight)
+			.toNumber();
+
+		// If the note center falls between two previous notes, it is deleted and colored white.
+		// Otherwise, its color is based on the color of the previous note that it falls within.
+		const noteColor = isModuloNull
+			? new Color(0xffffff)
+			: colors[yAxisColorIndex][xAxisColorIndex];
+
+		// Create the note object
+		const { mesh, outline } = createRectangleObject(
+			position,
+			noteColor,
+			pixelWidth.toNumber(),
+			pixelHeight.toNumber(),
+			disableNoteOutline
+		);
+
+		// Add the generated note components to the row
+		pixelsRow.add(mesh, outline);
+		// Save the new color at its index
+		newColors.push(noteColor);
+	}
+
+	return { pixelsRow, newColors };
+}
+
+/**
  * Creates a pixelated image as described in the statement of the problem.
  * @param pixelColors - Array containing the pixels of each row
  * @return The group object containing all of the pixels.
  */
-function createPixelatedImageObject(pixelColors: Array<Color[]>) {
+function createPixelatedImageObject(
+	pixelColors: Array<Color[]>,
+	orthonormalFactor: number
+) {
 	const pixelatedImage = new Group();
 	// Iterate over each row of the pixelated image
 	for (let i = 0; i < pixelColors.length; i++) {
 		// Iterate over each pixel of the row
 		const rowPixelsGroup = new Group();
 		for (let j = 0; j < pixelColors[i].length; j++) {
-			const pixel = createRectangleObject(
-				new Vector3(j, i),
-				pixelColors[i][j]
+			const { mesh, outline } = createRectangleObject(
+				new Vector3(j, i * orthonormalFactor),
+				pixelColors[i][j],
+				1,
+				orthonormalFactor
 			);
-			rowPixelsGroup.add(...pixel);
+			rowPixelsGroup.add(mesh, outline);
 		}
 		pixelatedImage.add(rowPixelsGroup);
 	}
@@ -93,14 +195,16 @@ async function drawPixelatedImage({
 		return;
 	}
 
+	const numberOfXAxisPixels = xResolution;
+	const numberOfYAxisPixels = yResolution;
+
+	const orthonormalFactor = numberOfXAxisPixels / numberOfYAxisPixels;
+
 	// Set the canvas size to a multiple of the resolution used
 	// It allows to have whole number pixel size
 	// TODO: Add scalefactor
 	canvas.width = xResolution * 100;
-	canvas.height = yResolution * 100;
-
-	const numberOfXAxisPixels = xResolution;
-	const numberOfYAxisPixels = yResolution;
+	canvas.height = yResolution * 100 * orthonormalFactor;
 
 	const xAxisPixelSize = canvas.width / numberOfXAxisPixels;
 	const yAxisPixelSize = canvas.height / numberOfYAxisPixels;
@@ -134,7 +238,10 @@ async function drawPixelatedImage({
 	);
 
 	// Create the pixelated image Threejs object
-	const pixelatedImage = createPixelatedImageObject(pixelColors);
+	const pixelatedImage = createPixelatedImageObject(
+		pixelColors,
+		orthonormalFactor
+	);
 
 	// Center the camera & change the zoom level
 	centerObject(pixelatedImage);

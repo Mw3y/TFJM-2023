@@ -26,8 +26,8 @@
 	camera.position.set(0, 0, 8);
 	scene.add(camera);
 
-	// The canvas for the images playground
-	const imageCanvas = ref();
+	// // The canvas for the images playground
+	// const imageCanvas = ref();
 
 	/**
 	 * App settings
