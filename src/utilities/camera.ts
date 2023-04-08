@@ -71,7 +71,8 @@ export function setCameraZoomToFitObject(
 		cameraZ *= offset;
 	}
 
-	camera.position.set(0, 0, cameraZ);
+	// Center the camera & fit the object in the viewport
+	camera.position.set(center.x, center.y, cameraZ);
 	orbitControls.target = center;
 
 	// Set the far plane of the camera so that it easily encompasses the whole object
