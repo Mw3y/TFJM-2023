@@ -78,15 +78,15 @@ export function createImagePixelRow({
 	previousPixelHeight: Decimal;
 }) {
 
-	// If there's too many notes, the outline is hidden.
+	// If there's too many pixels, the outline is hidden.
 	const disableNoteOutline = xResolution >= 100 || yResolution >= 100;
 
 	const pixelsRow = new Group();
 	const newColors = new Array<Color>();
 
-	// Create the note mesh and outline for each note
+	// Create the pixel mesh and outline for each note
 	for (let i = 0; i < xResolution * yResolution; i++) {
-		// The position of the note
+		// The position of the pixel
 		const pixelX = pixelWidth.times(i);
 		const pixelY = pixelHeight.times(i);
 		const position = new Vector3(pixelX.toNumber(), 0, 0);
@@ -96,7 +96,7 @@ export function createImagePixelRow({
 		const pixelCenterX = pixelX.add(halfPixelWidth);
 		const pixelCenterY = pixelY.add(halfPixelHeight);
 
-		// Determine if the note falls between two previous notes
+		// Determine if the pixel falls between two previous pixels
 		const xAxisModulo = pixelCenterX.mod(previousPixelWidth);
 		const yAxisModulo = pixelCenterY.mod(previousPixelHeight);
 
@@ -109,7 +109,7 @@ export function createImagePixelRow({
 
 		const isModuloNull = isXModuloNull || isYModuloNull;
 
-		// Determine the index of the note color
+		// Determine the index of the pixel color
 		const xAxisColorIndex = pixelCenterX
 			.dividedToIntegerBy(previousPixelWidth)
 			.toNumber();
@@ -118,13 +118,13 @@ export function createImagePixelRow({
 			.dividedToIntegerBy(previousPixelHeight)
 			.toNumber();
 
-		// If the note center falls between two previous notes, it is deleted and colored white.
-		// Otherwise, its color is based on the color of the previous note that it falls within.
+		// If the pixel center falls between two previous pixels, it is deleted and colored black.
+		// Otherwise, its color is based on the color of the previous pixel that it center falls within.
 		const noteColor = isModuloNull
 			? new Color(0xffffff)
 			: colors[yAxisColorIndex][xAxisColorIndex];
 
-		// Create the note object
+		// Create the pixel object
 		const { mesh, outline } = createRectangleObject(
 			position,
 			noteColor,
@@ -133,7 +133,7 @@ export function createImagePixelRow({
 			disableNoteOutline
 		);
 
-		// Add the generated note components to the row
+		// Add the generated pixel components to the row
 		pixelsRow.add(mesh, outline);
 		// Save the new color at its index
 		newColors.push(noteColor);
