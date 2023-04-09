@@ -8,8 +8,11 @@ import { RouteLocationNormalizedLoaded } from "vue-router";
 export const defaultSoundtrackResolutions = (
 	currentRoute: RouteLocationNormalizedLoaded
 ) => {
-	// (currentRoute.query.resolutions as string)?.split(",").map(Number) ??
-	return [4, 7];
+	return (
+		(currentRoute.query.soundtrackResolutions as string)
+			?.split(",")
+			.map(Number) ?? [4, 7]
+	);
 };
 
 export function useSoundtracksPlayground(

@@ -2,7 +2,11 @@ import { Color, Group, PerspectiveCamera, Scene, Vector3 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 import { Ref, isProxy, toRaw, watch } from "vue";
-import { centerObject, clearScene, createRectangleObject } from "../utilities/draw";
+import {
+	centerObject,
+	clearScene,
+	createRectangleObject,
+} from "../utilities/draw";
 import { setCameraZoomToFitObject } from "../utilities/camera";
 import { Decimal } from "decimal.js";
 import { RouteLocationNormalizedLoaded } from "vue-router";
@@ -25,6 +29,27 @@ const clamp = function (value: number, min: number, max: number) {
 export const defaultImageResolutions = (
 	currentRoute: RouteLocationNormalizedLoaded
 ): number[][] => {
+	const resolutionsQuery = currentRoute.query.imageResolutions?.toString();
+
+	if (resolutionsQuery) {
+		let rawResolutions = resolutionsQuery.split(",").map(Number);
+
+		if (rawResolutions.length % 2 === 1) {
+			rawResolutions.pop();
+		}
+
+		// Group all of the resolutions by two
+		const resolutions = [];
+		while (rawResolutions.length >= 2) {
+			resolutions.unshift(rawResolutions.splice(-2, 2));
+		}
+		resolutions.unshift(rawResolutions);
+
+		return resolutions.filter(
+			(resolutionArray) => resolutionArray.length !== 0
+		);
+	}
+
 	return [[28, 28]];
 };
 
@@ -41,30 +66,118 @@ export async function useImagesPlayground(
 		async function () {
 			const image = await createImage("/images/mona_lisa.jpg");
 
-			let newResolutions= new Array<number[]>()
+			let newResolutions = new Array<number[]>();
 			// Extract the resolutions from the proxy
-			if (isProxy(resolutions.value)){
-				newResolutions = toRaw(resolutions.value)
+			if (isProxy(resolutions.value)) {
+				newResolutions = toRaw(resolutions.value);
 			}
 
-			clearScene(scene);
-			console.log(newResolutions)
-
-			await drawPixelatedImage({
-				scene: scene,
-				camera: camera,
-				orbitControls: orbitControls,
-				xResolution: newResolutions[0][0],
-				yResolution: newResolutions[0][1],
-				image: image,
-			});
+			await drawPixelatedImages(
+				scene,
+				camera,
+				orbitControls,
+				newResolutions,
+				image,
+				scaleFactor.value,
+				decimalAccuracy.value
+			);
 		},
 		{ immediate: true, deep: true }
 	);
 }
 
+async function drawPixelatedImages(
+	scene: Scene,
+	camera: PerspectiveCamera,
+	orbitControls: OrbitControls,
+	resolutions: Array<number[]>,
+	image: HTMLImageElement,
+	scaleFactor: number,
+	decimalAccuracy: number
+) {
+	clearScene(scene);
+
+	Decimal.config({
+		modulo: Decimal.EUCLID,
+		precision: decimalAccuracy,
+	});
+
+	let colors = await getPixelColorsFromImage({
+		xResolution: resolutions[0][0],
+		yResolution: resolutions[0][1],
+		image: image,
+	});
+
+	if (!colors) {
+		return;
+	}
+
+	const allImages = createPixelatedImages(resolutions, colors);
+
+	// Scale everything up for easier visibility
+	allImages.scale.copy(new Vector3(scaleFactor, scaleFactor, scaleFactor));
+	// Center the camera & change the zoom level
+	setCameraZoomToFitObject(
+		camera,
+		allImages,
+		orbitControls,
+		2.5,
+		scaleFactor
+	);
+
+	// Render all of the images on the scene
+	scene.add(allImages);
+}
+
+function createPixelatedImages(resolutions: number[][], colors: Color[][]) {
+	const imagesGroup = new Group();
+	let previousPixelWidth, previousPixelHeight;
+
+	const pixelatedImageWidth = resolutions[0][0] * 100;
+	const pixelatedImageHeight = resolutions[0][1] * 100;
+
+	for (let i = 0; i < resolutions.length; i++) {
+		const xResolution = resolutions[i][0];
+		const yResolution = resolutions[i][1];
+
+		const xAxisPixelSize = new Decimal(pixelatedImageWidth).dividedBy(
+			xResolution
+		);
+		const yAxisPixelSize = new Decimal(pixelatedImageHeight).dividedBy(
+			yResolution
+		);
+
+		const { pixelRows, newColors } = createPixelatedImage({
+			xResolution: xResolution,
+			yResolution: yResolution,
+			colors: colors,
+			pixelWidth: new Decimal(pixelatedImageWidth).dividedBy(xResolution),
+			pixelHeight: new Decimal(pixelatedImageHeight).dividedBy(
+				yResolution
+			),
+			previousPixelWidth: previousPixelWidth ?? xAxisPixelSize,
+			previousPixelHeight: previousPixelHeight ?? yAxisPixelSize,
+		});
+
+		// Center the image on the x-axis
+		centerObject(pixelRows);
+
+		// Add y-axis spacing
+		pixelRows.position.y = 0;
+		pixelRows.position.add(new Vector3(i * 1.25 * pixelatedImageWidth));
+
+		imagesGroup.add(pixelRows);
+
+		colors = newColors;
+		previousPixelWidth = xAxisPixelSize;
+		previousPixelHeight = yAxisPixelSize;
+	}
+
+	return imagesGroup;
+}
+
 /**
- * Creates a row of pixels as described in the statement of the problem.
+ * Creates a pixelated image of size xResolution by yResolution.
  *
  * @param params
  * @param params.notesNumber
@@ -77,7 +190,7 @@ export async function useImagesPlayground(
  *
  * @return { Group } The group object containing all of the pixels.
  */
-export function createImagePixelRow({
+export function createPixelatedImage({
 	xResolution,
 	yResolution,
 	colors,
@@ -98,13 +211,14 @@ export function createImagePixelRow({
 	// If there's too many pixels, the outline is hidden.
 	const disableNoteOutline = xResolution >= 100 || yResolution >= 100;
 
-	const pixelsRow = new Group();
-	const newColors = new Array<Color>();
+	const pixelRows = new Group();
+	const newColors = new Array<Color[]>();
 
 	// Create the pixel mesh and outline for each note
 	// Iterate over each row of the pixelated image
 	for (let i = 0; i < yResolution; i++) {
 		// Iterate over each pixel of the row
+		const newRowColors = [];
 		for (let j = 0; j < xResolution; j++) {
 			// The position of the pixel
 			const pixelX = pixelWidth.times(j);
@@ -147,7 +261,8 @@ export function createImagePixelRow({
 			// Otherwise, its color is based on the color of the previous pixel that it center falls within.
 			const pixelColor = isModuloNull
 				? new Color(0x000000)
-				: colors[yAxisColorIndex]?.[xAxisColorIndex];
+				: colors[yAxisColorIndex]?.[xAxisColorIndex] ??
+				  new Color("red");
 
 			// Create the pixel object
 			const { mesh, outline } = createRectangleObject(
@@ -159,9 +274,9 @@ export function createImagePixelRow({
 			);
 
 			// Add the generated pixel components to the row
-			pixelsRow.add(mesh, outline);
+			pixelRows.add(mesh, outline);
 			// Save the new color at its index
-			newColors.push(pixelColor);
+			newRowColors.push(pixelColor);
 
 			debugData.push({
 				pixelX: pixelX.toNumber(),
@@ -180,16 +295,17 @@ export function createImagePixelRow({
 				noteColor: pixelColor.getHexString(),
 			});
 		}
+		newColors.push(newRowColors);
 	}
 
 	console.table(debugData);
-	console.log(
-		"%c⇒ %i black pixel(s).",
-		importantConsoleInfoStyle,
-		newColors.filter((color) => color.equals(new Color(0x000000))).length
-	);
+	// console.log(
+	// 	"%c⇒ %i black pixel(s).",
+	// 	importantConsoleInfoStyle,
+	// 	newColors.filter((color) => color.equals(new Color(0x000000))).length
+	// );
 
-	return { pixelsRow, newColors };
+	return { pixelRows, newColors };
 }
 
 /**
@@ -221,17 +337,11 @@ function createPixelatedImageObject(
 	return pixelatedImage;
 }
 
-async function drawPixelatedImage({
-	scene,
-	camera,
-	orbitControls,
+async function getPixelColorsFromImage({
 	xResolution,
 	yResolution,
 	image,
 }: {
-	scene: Scene;
-	camera: PerspectiveCamera;
-	orbitControls: OrbitControls;
 	xResolution: number;
 	yResolution: number;
 	image: HTMLImageElement;
@@ -287,43 +397,7 @@ async function drawPixelatedImage({
 		yAxisPixelSize
 	);
 
-	// Create the pixelated image Threejs object
-	const { pixelsRow: pixelatedImage } = createImagePixelRow({
-		xResolution: xResolution,
-		yResolution: yResolution,
-		colors: pixelColors,
-		pixelWidth: new Decimal(canvas.width).dividedBy(xResolution),
-		pixelHeight: new Decimal(canvas.height).dividedBy(yResolution),
-		previousPixelWidth: new Decimal(xAxisPixelSize),
-		previousPixelHeight: new Decimal(yAxisPixelSize),
-	});
-
-	// Center the camera & change the zoom level
-	centerObject(pixelatedImage);
-	setCameraZoomToFitObject(camera, pixelatedImage, orbitControls, 2.5);
-
-	// scene.add(pixelatedImage);
-
-	const newResolution = [31, 31];
-	const newPixelatedImage = createImagePixelRow({
-		xResolution: newResolution[0],
-		yResolution: newResolution[1],
-		colors: pixelColors,
-		pixelWidth: new Decimal(canvas.width).dividedBy(newResolution[0]),
-		pixelHeight: new Decimal(canvas.height).dividedBy(newResolution[1]),
-		previousPixelWidth: new Decimal(xAxisPixelSize),
-		previousPixelHeight: new Decimal(yAxisPixelSize),
-	});
-
-	scene.add(newPixelatedImage.pixelsRow);
-
-	centerObject(newPixelatedImage.pixelsRow);
-	setCameraZoomToFitObject(
-		camera,
-		newPixelatedImage.pixelsRow,
-		orbitControls,
-		2.5
-	);
+	return pixelColors;
 }
 
 /**

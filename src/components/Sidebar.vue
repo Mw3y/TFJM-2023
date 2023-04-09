@@ -40,27 +40,25 @@
 	);
 
 	const imagesResolutions = computed(() => {
-		return resolutionsInputContent.value
-			.replaceAll(" ", "")
-			.replace(/,\s*$/, "")
-			.split(",")
-			.map((value) =>
-				value
-					.trim()
-					.slice(1, -1)
-					.split(";")
-					.map((str) => parseInt(str))
-					.filter((int) => !isNaN(int))
-			);
+		return (
+			resolutionsInputContent.value
+				.match(/\((\d+;\s?\d+)\)/g)
+				?.map((value: string) =>
+					value
+						.match(/\d+/g)
+						?.map((str) => parseInt(str))
+						.filter((int) => !isNaN(int))
+				) ?? [[]]
+		);
 	});
 
 	const soundtrackResolutions = computed(() => {
-		return resolutionsInputContent.value
-			.replaceAll(" ", "")
-			.replace(/,\s*$/, "")
-			.split(",")
-			.map((str) => parseInt(str))
-			.filter((int) => !isNaN(int));
+		return (
+			resolutionsInputContent.value
+				.match(/\d+/g)
+				?.map((str) => parseInt(str))
+				.filter((int) => !isNaN(int)) ?? []
+		);
 	});
 
 	const defaultResolutions = isSoundtracksPlayground
@@ -71,9 +69,14 @@
 
 	const resolutionsInputContent = ref(defaultResolutions);
 	function handleResolutionsChange() {
-		isSoundtracksPlayground
-			? emit("soundtrackResolutionsChange", soundtrackResolutions.value)
-			: emit("imageResolutionsChange", imagesResolutions.value);
+		if (isSoundtracksPlayground) {
+			emit("soundtrackResolutionsChange", soundtrackResolutions.value);
+		} else if (imagesResolutions.value) {
+			emit(
+				"imageResolutionsChange",
+				<typeof props.defaultImageResolutions>imagesResolutions.value
+			);
+		}
 	}
 
 	function validateResolutionInput(event: Event) {
@@ -87,12 +90,34 @@
 	}
 
 	function addResolutionSeparator() {
+		const trimmedInputContent = resolutionsInputContent.value.trim();
 		if (
-			(soundtrackResolutions.value.length > 0 ||
-				imagesResolutions.value.length > 0) &&
-			!resolutionsInputContent.value.trim().endsWith(",")
+			!trimmedInputContent.endsWith(",") &&
+			!trimmedInputContent.endsWith(";") &&
+			trimmedInputContent.length > 0
 		) {
-			resolutionsInputContent.value += ", ";
+			if (
+				!isSoundtracksPlayground &&
+				!["(", ")", ",", ";"].includes(trimmedInputContent.slice(-1))
+			) {
+				// if (
+				// 	imagesResolutions.value[imagesResolutions.value.length - 1]
+				// 		?.length === 2
+				// ) {
+				// 	resolutionsInputContent.value += "), ";
+				// } else {
+					resolutionsInputContent.value += "; ";
+				// }
+			}
+			// Automatically add a new resolution
+			else if (!trimmedInputContent.endsWith("(")) {
+				resolutionsInputContent.value += ", ";
+				if (!isSoundtracksPlayground) {
+					resolutionsInputContent.value += "(";
+				}
+			}
+		} else if (trimmedInputContent.endsWith("),")) {
+			resolutionsInputContent.value += "(";
 		}
 	}
 

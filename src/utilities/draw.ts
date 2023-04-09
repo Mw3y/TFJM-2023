@@ -269,7 +269,6 @@ export function drawSoundtracks(
 	// Scale everything up for easier visibility
 	allNotesRows.scale.copy(new Vector3(scaleFactor, scaleFactor, scaleFactor));
 	// Center the camera & change the zoom level
-	centerObject(allNotesRows);
 	setCameraZoomToFitObject(
 		camera,
 		allNotesRows,

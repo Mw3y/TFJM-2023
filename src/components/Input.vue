@@ -25,7 +25,7 @@
 			@keyup.enter="emit('submit')"
 			type="text"
 			class="block w-full p-4 text-base text-neutral-600 border border-[#bdbdbd] rounded-xl bg-gray-50 focus:ring-blue-500 focus:border-blue-500 outline-none"
-			placeholder="Résolutions : 4, 7"
+			placeholder="Résolutions"
 			required
 		/>
 		<button
