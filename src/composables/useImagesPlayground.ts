@@ -1,10 +1,11 @@
 import { Color, Group, PerspectiveCamera, Scene, Vector3 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-import { Ref, watch } from "vue";
-import { centerObject, createRectangleObject } from "../utilities/draw";
+import { Ref, isProxy, toRaw, watch } from "vue";
+import { centerObject, clearScene, createRectangleObject } from "../utilities/draw";
 import { setCameraZoomToFitObject } from "../utilities/camera";
 import { Decimal } from "decimal.js";
+import { RouteLocationNormalizedLoaded } from "vue-router";
 
 const importantConsoleInfoStyle =
 	"font-size: 24px; font-weight: bold; padding: 24px 0";
@@ -21,31 +22,44 @@ const clamp = function (value: number, min: number, max: number) {
 	return Math.min(Math.max(value, min), max);
 };
 
+export const defaultImageResolutions = (
+	currentRoute: RouteLocationNormalizedLoaded
+): number[][] => {
+	return [[28, 28]];
+};
+
 export async function useImagesPlayground(
 	scene: Scene,
 	camera: PerspectiveCamera,
 	orbitControls: OrbitControls,
-	resolutions: Ref<number[]>,
+	resolutions: Ref<number[][]>,
 	scaleFactor: Ref<number>,
 	decimalAccuracy: Ref<number>
 ) {
-	const resolution = [28, 28];
-
 	watch(
 		[resolutions, scaleFactor, decimalAccuracy],
 		async function () {
 			const image = await createImage("/images/mona_lisa.jpg");
 
+			let newResolutions= new Array<number[]>()
+			// Extract the resolutions from the proxy
+			if (isProxy(resolutions.value)){
+				newResolutions = toRaw(resolutions.value)
+			}
+
+			clearScene(scene);
+			console.log(newResolutions)
+
 			await drawPixelatedImage({
 				scene: scene,
 				camera: camera,
 				orbitControls: orbitControls,
-				xResolution: resolution[0],
-				yResolution: resolution[1],
+				xResolution: newResolutions[0][0],
+				yResolution: newResolutions[0][1],
 				image: image,
 			});
 		},
-		{ immediate: true }
+		{ immediate: true, deep: true }
 	);
 }
 
@@ -290,7 +304,7 @@ async function drawPixelatedImage({
 
 	// scene.add(pixelatedImage);
 
-	const newResolution = [13, 13];
+	const newResolution = [31, 31];
 	const newPixelatedImage = createImagePixelRow({
 		xResolution: newResolution[0],
 		yResolution: newResolution[1],

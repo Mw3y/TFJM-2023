@@ -7,8 +7,14 @@
 	import Navbar from "./Navbar.vue";
 	import Sidebar from "./Sidebar.vue";
 	import { enable2DMovement } from "../utilities/controls";
-	import { useNotesPlayground } from "../composables/useNotesPlayground";
-	import { useImagesPlayground } from "../composables/useImagesPlayground";
+	import {
+		useSoundtracksPlayground,
+		defaultSoundtrackResolutions,
+	} from "../composables/useSoundtracksPlayground";
+	import {
+		defaultImageResolutions,
+		useImagesPlayground,
+	} from "../composables/useImagesPlayground";
 
 	const props = defineProps<{
 		type: "soundtracks" | "images";
@@ -32,11 +38,11 @@
 	/**
 	 * App settings
 	 */
-	const defaultResolutions = (currentRoute.query.resolutions as string)
-		?.split(",")
-		.map(Number) ?? [4, 7];
-
-	const resolutions = ref(defaultResolutions);
+	const isSoundtracksPlayground = props.type === "soundtracks";
+	const soundtrackResolutions = ref(
+		defaultSoundtrackResolutions(currentRoute)
+	);
+	const imageResolutions = ref(defaultImageResolutions(currentRoute));
 
 	const maxScaleFactor = 1e6;
 	const defaultScaleFactor = parseInt(
@@ -68,12 +74,21 @@
 	// scene.add(new AxesHelper(5 * scaleFactor));
 
 	/**
-	 * Updates the resolution list
+	 * Updates the resolution list of the soundtracks.
 	 * @param newResolutions
 	 */
-	const changeResolutionList = (newResolutions: Array<number>) => {
-		resolutions.value = newResolutions;
+	const changeSoundtracksResolutionList = (newResolutions: Array<number>) => {
+		soundtrackResolutions.value = newResolutions;
+		// Change the resolution list in the url params
+		updateUrlParams();
+	};
 
+	/**
+	 * Updates the resolution list of the images.
+	 * @param newResolutions
+	 */
+	const changeImagesResolutionList = (newResolutions: Array<number[]>) => {
+		imageResolutions.value = newResolutions;
 		// Change the resolution list in the url params
 		updateUrlParams();
 	};
@@ -107,7 +122,8 @@
 		// Change the scaleFactor in the url params
 		router.replace({
 			query: {
-				resolutions: resolutions.value.join(","),
+				soundtrackResolutions: soundtrackResolutions.value.join(","),
+				imageResolutions: imageResolutions.value.join(","),
 				"scale-factor": scaleFactor.value,
 				"decimal-accuracy": decimalAccuracy.value,
 			},
@@ -127,17 +143,26 @@
 		renderer.setSize(width.value, height.value);
 
 		const orbitControls = enable2DMovement(camera, renderer);
-		const usePlayground =
-			props.type === "images" ? useImagesPlayground : useNotesPlayground;
 
-		usePlayground(
-			scene,
-			camera,
-			orbitControls,
-			resolutions,
-			scaleFactor,
-			decimalAccuracy,
-		);
+		if (isSoundtracksPlayground)
+			useSoundtracksPlayground(
+				scene,
+				camera,
+				orbitControls,
+				soundtrackResolutions,
+				scaleFactor,
+				decimalAccuracy
+			);
+		else {
+			useImagesPlayground(
+				scene,
+				camera,
+				orbitControls,
+				imageResolutions,
+				scaleFactor,
+				decimalAccuracy
+			);
+		}
 
 		renderer.setAnimationLoop(() => {
 			renderer.render(scene, camera);
@@ -148,14 +173,17 @@
 <template>
 	<Navbar />
 	<Sidebar
-		@resolutionChange="changeResolutionList"
+		@soundtrackResolutionsChange="changeSoundtracksResolutionList"
+		@imageResolutionsChange="changeImagesResolutionList"
 		@scaleFactorChange.lazy="changeScaleFactor"
 		@decimalAccuracyChange.lazy="changeDecimalAccuracy"
 		:scaleFactorMax="maxScaleFactor"
 		:defaultScaleFactor="defaultScaleFactor"
 		:decimalAccuracyMax="maxDecimalAccuracy"
 		:defaultDecimalAccuracy="defaultDecimalAccuracy"
-		:defaultResolutions="resolutions"
+		:defaultSoundtrackResolutions="soundtrackResolutions"
+		:defaultImageResolutions="imageResolutions"
+		:playground="props.type"
 	/>
 	<!-- Used to debug the image pixelation -->
 	<!-- <canvas

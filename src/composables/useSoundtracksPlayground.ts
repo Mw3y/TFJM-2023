@@ -2,9 +2,17 @@ import { PerspectiveCamera, Scene } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Ref, watch } from "vue";
 import { drawSoundtracks } from "../utilities/draw";
-import { generateColorPalette} from "../utilities/colors";
+import { generateColorPalette } from "../utilities/colors";
+import { RouteLocationNormalizedLoaded } from "vue-router";
 
-export function useNotesPlayground(
+export const defaultSoundtrackResolutions = (
+	currentRoute: RouteLocationNormalizedLoaded
+) => {
+	// (currentRoute.query.resolutions as string)?.split(",").map(Number) ??
+	return [4, 7];
+};
+
+export function useSoundtracksPlayground(
 	scene: Scene,
 	camera: PerspectiveCamera,
 	orbitControls: OrbitControls,

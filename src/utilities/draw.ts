@@ -56,7 +56,7 @@ export function createRectangleObject(
 ) {
 	// Create the mesh of the rectangle
 	const mesh = new Mesh(
-		new PlaneGeometry(width, height),
+		new PlaneGeometry(width, height, 1, 1),
 		new MeshBasicMaterial({
 			color,
 		})

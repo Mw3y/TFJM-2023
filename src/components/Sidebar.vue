@@ -6,15 +6,19 @@
 	const props = defineProps<{
 		scaleFactorMax: number;
 		defaultScaleFactor: number;
-		defaultResolutions: number[];
 		decimalAccuracyMax: number;
 		defaultDecimalAccuracy: number;
+		defaultSoundtrackResolutions: number[];
+		defaultImageResolutions: number[][];
+		playground: "soundtracks" | "images";
 	}>();
 
 	const version = __APP_VERSION__;
+	const isSoundtracksPlayground = props.playground === "soundtracks";
 
 	const emit = defineEmits<{
-		(e: "resolutionChange", value: Array<number>): void;
+		(e: "soundtrackResolutionsChange", value: Array<number>): void;
+		(e: "imageResolutionsChange", value: Array<number[]>): void;
 		(e: "scaleFactorChange", value: number): void;
 		(e: "decimalAccuracyChange", value: number): void;
 	}>();
@@ -35,22 +39,47 @@
 		emit("decimalAccuracyChange", parseInt(decimalAccuracy.value))
 	);
 
-	const resolutions = computed(() => {
+	const imagesResolutions = computed(() => {
 		return resolutionsInputContent.value
 			.replaceAll(" ", "")
 			.replace(/,\s*$/, "")
 			.split(",")
-			.map((value) => parseInt(value))
-			.filter((value) => !isNaN(value));
+			.map((value) =>
+				value
+					.trim()
+					.slice(1, -1)
+					.split(";")
+					.map((str) => parseInt(str))
+					.filter((int) => !isNaN(int))
+			);
 	});
 
-	const resolutionsInputContent = ref(props.defaultResolutions.join(", "));
+	const soundtrackResolutions = computed(() => {
+		return resolutionsInputContent.value
+			.replaceAll(" ", "")
+			.replace(/,\s*$/, "")
+			.split(",")
+			.map((str) => parseInt(str))
+			.filter((int) => !isNaN(int));
+	});
+
+	const defaultResolutions = isSoundtracksPlayground
+		? props.defaultSoundtrackResolutions.join(", ")
+		: props.defaultImageResolutions
+				.map((resolutions) => "(" + resolutions.join("; ") + ")")
+				.join(", ");
+
+	const resolutionsInputContent = ref(defaultResolutions);
 	function handleResolutionsChange() {
-		emit("resolutionChange", resolutions.value);
+		isSoundtracksPlayground
+			? emit("soundtrackResolutionsChange", soundtrackResolutions.value)
+			: emit("imageResolutionsChange", imagesResolutions.value);
 	}
 
 	function validateResolutionInput(event: Event) {
-		const pattern = /(?:,|\s|\d+)/;
+		const pattern = isSoundtracksPlayground
+			? /(?:,|\s|\d+)/
+			: /(?:,|\s|\d+|\(|\)|;)/; // Allow parentheses
 		const key = (event as KeyboardEvent).key;
 		if (!pattern.test(key)) {
 			event.preventDefault();
@@ -59,7 +88,8 @@
 
 	function addResolutionSeparator() {
 		if (
-			resolutions.value.length > 0 &&
+			(soundtrackResolutions.value.length > 0 ||
+				imagesResolutions.value.length > 0) &&
 			!resolutionsInputContent.value.trim().endsWith(",")
 		) {
 			resolutionsInputContent.value += ", ";
@@ -88,7 +118,9 @@
 		/>
 		<div v-if="!isSidebarHidden" class="flex flex-col gap-4 mb-4">
 			<div class="flex flex-col space-y-2">
-				<p class="text-neutral-500 text-lg font-medium">Résolution(s) :</p>
+				<p class="text-neutral-500 text-lg font-medium">
+					Résolution(s) :
+				</p>
 				<p class="text-neutral-500 text-sm">
 					<strong>Astuce 🛈 :</strong> Appuyer sur TAB pour créer une
 					nouvelle résolution.
