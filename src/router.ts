@@ -1,7 +1,7 @@
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 
 export default createRouter({
-	history: createWebHashHistory("/cpge/tfjm-2023/problem-4"),
+	history: createWebHistory("/cpge/tfjm-2023/problem-4"),
 	routes: [
 		{
 			name: "SoundtracksPlayground",
