@@ -1,7 +1,7 @@
 <script setup lang="ts">
 	import { useWindowSize, watchThrottled } from "@vueuse/core";
 	import { onMounted, ref } from "vue";
-	import { useRoute, useRouter } from "vue-router";
+	import { LocationQueryRaw, useRoute, useRouter } from "vue-router";
 	import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
 
 	import Navbar from "./Navbar.vue";
@@ -120,13 +120,27 @@
 	 */
 	function updateUrlParams() {
 		// Change the scaleFactor in the url params
+
+		interface QueryType {
+			"scale-factor": number;
+			"decimal-accuracy": number;
+			soundtrackResolutions?: string;
+			imageResolutions?: string;
+		}
+
+		const query: QueryType = {
+			"scale-factor": scaleFactor.value,
+			"decimal-accuracy": decimalAccuracy.value,
+		};
+
+		if (isSoundtracksPlayground) {
+			query.soundtrackResolutions = soundtrackResolutions.value.join(",");
+		} else {
+			query.imageResolutions = imageResolutions.value.join(",");
+		}
+
 		router.replace({
-			query: {
-				soundtrackResolutions: soundtrackResolutions.value.join(","),
-				imageResolutions: imageResolutions.value.join(","),
-				"scale-factor": scaleFactor.value,
-				"decimal-accuracy": decimalAccuracy.value,
-			},
+			query: query as unknown as LocationQueryRaw,
 		});
 	}
 
