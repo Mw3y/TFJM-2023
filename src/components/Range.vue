@@ -18,7 +18,7 @@
 		<label
 			v-if="props.label"
 			:for="props.id"
-			class="block mb-2 text-lg font-medium text-neutral-500"
+			class="block mb-2 text-lg font-medium text-neutral-700"
 		>
 			{{ props.label }}
 		</label>

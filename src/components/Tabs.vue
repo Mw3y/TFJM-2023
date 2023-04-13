@@ -42,10 +42,10 @@
 
 <style type="text/css" scoped>
 	.tab-active {
-		@apply inline-block w-full px-4 py-2 text-gray-700 bg-white focus:outline-none;
+		@apply inline-block w-full px-4 py-2 text-neutral-700 bg-white focus:outline-none;
 	}
 
 	.tab-inactive {
-		@apply inline-block w-full px-4 py-2 bg-gray-50 text-gray-400 hover:text-gray-700 hover:bg-white focus:outline-none;
+		@apply inline-block w-full px-4 py-2 bg-gray-50 text-neutral-500 hover:text-neutral-700 hover:bg-white focus:outline-none;
 	}
 </style>

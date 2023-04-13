@@ -145,7 +145,7 @@
 		<div v-if="!isSidebarHidden" class="flex flex-col gap-4 mb-4">
 			<Tabs :playground="props.playground" />
 			<div class="flex flex-col space-y-2">
-				<p class="text-neutral-500 text-lg font-medium">
+				<p class="text-neutral-700 text-lg font-medium">
 					Résolution(s) :
 				</p>
 				<p class="text-neutral-500 text-sm">
