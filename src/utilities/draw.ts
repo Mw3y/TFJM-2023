@@ -261,13 +261,13 @@ export function createSoundtracks(
 			colors,
 		});
 
-		// Save the generated row
-		notesRows.push(notesRow);
-
 		// Center the row on the x-axis
 		centerObject(notesRow);
 		// Add y-axis spacing
 		notesRow.position.add(new Vector3(0, -i * 1.5));
+
+		// Save the generated row
+		notesRows.push(notesRow);
 
 		// Save data to create the next row
 		colors = newColors;
@@ -417,7 +417,7 @@ export function createPixelatedImages(
 			yResolution
 		);
 
-		const { pixelRows, newColors } = createPixelatedImage({
+		const { imagePixels, newColors } = createPixelatedImage({
 			xResolution: xResolution,
 			yResolution: yResolution,
 			colors: colors,
@@ -430,13 +430,12 @@ export function createPixelatedImages(
 		});
 
 		// Center the image on the x-axis
-		centerObject(pixelRows);
-
+		centerObject(imagePixels);
 		// Add y-axis spacing
-		pixelRows.position.y = 0;
-		pixelRows.position.add(new Vector3(i * 1.25 * pixelatedImageWidth));
+		imagePixels.position.add(new Vector3(i * 1.25 * pixelatedImageWidth));
 
-		imagesGroup.add(pixelRows);
+		// Save the generated row
+		imagesGroup.add(imagePixels);
 
 		colors = newColors;
 		previousPixelWidth = xAxisPixelSize;
@@ -458,7 +457,7 @@ export function createPixelatedImages(
  * @param params.previousNoteWidth
  * @param params.verticalAxisMargin
  *
- * @return { Group } The group object containing all of the pixels.
+ * @return { Group } The Group containing all of the pixels.
  */
 export function createPixelatedImage({
 	xResolution,
@@ -481,7 +480,7 @@ export function createPixelatedImage({
 	// If there's too many pixels, the outline is hidden.
 	const disableNoteOutline = xResolution >= 100 || yResolution >= 100;
 
-	const pixelRows = new Group();
+	const imagePixels = new Group();
 	const newColors = new Array<Color[]>();
 
 	// Create the pixel mesh and outline for each note
@@ -544,7 +543,7 @@ export function createPixelatedImage({
 			);
 
 			// Add the generated pixel components to the row
-			pixelRows.add(mesh, outline);
+			imagePixels.add(mesh, outline);
 			// Save the new color at its index
 			newRowColors.push(pixelColor);
 
@@ -568,14 +567,21 @@ export function createPixelatedImage({
 		newColors.push(newRowColors);
 	}
 
-	console.table(debugData);
+	// console.log(
+	// 	"center",
+	// 	new Box3()
+	// 		.setFromObject(test)
+	// 		.getCenter(test.position).multiplyScalar( - 1 )
+	// );
+
+	// console.table(debugData);
 	// console.log(
 	// 	"%c⇒ %i black pixel(s).",
 	// 	importantConsoleInfoStyle,
 	// 	newColors.filter((color) => color.equals(new Color(0x000000))).length
 	// );
 
-	return { pixelRows, newColors };
+	return { imagePixels, newColors };
 }
 
 /**
