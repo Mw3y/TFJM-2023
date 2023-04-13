@@ -1,7 +1,7 @@
 {
   "name": "problem_4_vite",
   "private": true,
-  "version": "14.3.0",
+  "version": "15.4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
