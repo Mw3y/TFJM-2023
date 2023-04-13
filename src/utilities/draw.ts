@@ -335,6 +335,17 @@ export function drawSoundtracks(
 	scene.add(allNotesRows);
 }
 
+/**
+ * Draws all of the images to the screen.
+ *
+ * @param scene - The scene to draw to.
+ * @param camera
+ * @param orbitControls
+ * @param resolutions
+ * @param image
+ * @param scaleFactor
+ * @param decimalAccuracy
+ */
 export async function drawPixelatedImages(
 	scene: Scene,
 	camera: PerspectiveCamera,
@@ -378,6 +389,13 @@ export async function drawPixelatedImages(
 	scene.add(allImages);
 }
 
+/**
+ * Creates a pixelated image for each given resolutions.
+ *
+ * @param resolutions - The resolutions of each images
+ * @param colors - The colors of the first image
+ * @returns A group containing all of the images.
+ */
 export function createPixelatedImages(
 	resolutions: Array<number[]>,
 	colors: Color[][]
@@ -562,6 +580,7 @@ export function createPixelatedImage({
 
 /**
  * Creates a pixelated image as described in the statement of the problem.
+ *
  * @param pixelColors - Array containing the pixels of each row
  * @return The group object containing all of the pixels.
  */
@@ -589,6 +608,15 @@ export function createPixelatedImageObject(
 	return pixelatedImage;
 }
 
+/**
+ * Extracts the colors of each pixel of a given size from the image.
+ *
+ * @param params
+ * @param params.xResolution - The number of pixels on the x-axis
+ * @param params.yResolution - The number of pixels on the y-axis
+ * @param params.image - The image to extract the colors from
+ * @returns An array of arrays of colors (one array per row).
+ */
 export async function getPixelColorsFromImage({
 	xResolution,
 	yResolution,
@@ -732,6 +760,7 @@ export function createFittedInCanvasImage({
 
 /**
  * Converts a pixelated image to an array of colors.
+ *
  * @param ctx
  * @param numberOfPixels - The number of pixels to fit on a side
  * @param pixelSize - The size of a pixel
@@ -775,6 +804,7 @@ export function extractPixelatedImageColors(
 
 /**
  * Pixelates an image.
+ *
  * @param canvas
  * @param ctx
  * @param image - The image to be pixelated
@@ -821,6 +851,7 @@ export function pixelateCanvasImage(
 
 /**
  * Crops the given image.
+ *
  * @param image - The image to be cropped
  * @param outputImageAspectRatio - The aspect ratio of the cropped image.
  */
