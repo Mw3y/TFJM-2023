@@ -6,18 +6,12 @@ export default createRouter({
 		{
 			name: "SoundtracksPlayground",
 			path: "/playground/soundtracks",
-			component: () => import("./pages/Playground.vue"),
-			props: {
-				type: "soundtracks",
-			},
+			component: () => import("./pages/SoundtracksPlayground.vue"),
 		},
 		{
-			name: "ImagessPlayground",
+			name: "ImagesPlayground",
 			path: "/playground/images",
-			component: () => import("./pages/Playground.vue"),
-			props: {
-				type: "images",
-			},
+			component: () => import("./pages/ImagesPlayground.vue"),
 		},
 		{
 			path: "/unauthorized",
