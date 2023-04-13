@@ -56,6 +56,8 @@
 	);
 	const decimalAccuracy = ref(defaultDecimalAccuracy);
 
+	const currentImage = ref<HTMLImageElement | null>(null);
+
 	/**
 	 * Watch for a window resize.
 	 */
@@ -113,6 +115,14 @@
 
 		// Change the scaleFactor in the url params
 		updateUrlParams();
+	};
+
+	/**
+	 * Updates the image to use in the images playground.
+	 * @param image
+	 */
+	const changeSelectedImage = (image: HTMLImageElement) => {
+		currentImage.value = image;
 	};
 
 	/**
@@ -174,7 +184,8 @@
 				orbitControls,
 				imageResolutions,
 				scaleFactor,
-				decimalAccuracy
+				decimalAccuracy,
+				currentImage
 			);
 		}
 
@@ -191,6 +202,7 @@
 		@imageResolutionsChange="changeImagesResolutionList"
 		@scaleFactorChange.lazy="changeScaleFactor"
 		@decimalAccuracyChange.lazy="changeDecimalAccuracy"
+		@onImageUpload="changeSelectedImage"
 		:scaleFactorMax="maxScaleFactor"
 		:defaultScaleFactor="defaultScaleFactor"
 		:decimalAccuracyMax="maxDecimalAccuracy"

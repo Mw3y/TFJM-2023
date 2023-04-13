@@ -23,6 +23,7 @@
 		(e: "imageResolutionsChange", value: Array<number[]>): void;
 		(e: "scaleFactorChange", value: number): void;
 		(e: "decimalAccuracyChange", value: number): void;
+		(e: "onImageUpload", value: HTMLImageElement): void;
 	}>();
 
 	const scaleFactor = ref(props.defaultScaleFactor.toString());
@@ -183,7 +184,10 @@
 				que le nombre de silences sont disponibles dans la console
 				(touche F12).
 			</p>
-			<FileUploadZone v-if="!isSoundtracksPlayground"/>
+			<FileUploadZone
+				v-if="!isSoundtracksPlayground"
+				@on-image-upload="emit('onImageUpload', $event)"
+			/>
 		</div>
 
 		<h3

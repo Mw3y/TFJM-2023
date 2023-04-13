@@ -38,12 +38,15 @@ export async function useImagesPlayground(
 	orbitControls: OrbitControls,
 	resolutions: Ref<number[][]>,
 	scaleFactor: Ref<number>,
-	decimalAccuracy: Ref<number>
+	decimalAccuracy: Ref<number>,
+	currentImage: Ref<HTMLImageElement | null>
 ) {
 	watch(
-		[resolutions, scaleFactor, decimalAccuracy],
+		[resolutions, scaleFactor, decimalAccuracy, currentImage],
 		async function () {
-			const image = await createImage("/images/mona_lisa.jpg");
+			const image = currentImage.value ?? await createImage("/images/mona_lisa.jpg");
+
+			console.log(image)
 
 			let newResolutions = new Array<number[]>();
 			// Extract the resolutions from the proxy
