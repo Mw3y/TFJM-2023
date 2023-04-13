@@ -142,9 +142,8 @@
 			class="w-10 h-10 p-2"
 			src="/svg/arrow-left.svg"
 		/>
-		<Tabs :playground="props.playground"/>
 		<div v-if="!isSidebarHidden" class="flex flex-col gap-4 mb-4">
-		<Tabs :playground="props.playground"/>
+			<Tabs :playground="props.playground" />
 			<div class="flex flex-col space-y-2">
 				<p class="text-neutral-500 text-lg font-medium">
 					Résolution(s) :
