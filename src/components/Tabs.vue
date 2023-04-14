@@ -9,12 +9,12 @@
 
 <template>
 	<ul
-		class="cursor-pointer border border-[#bdbdbd] text-sm font-medium text-center divide-x divide-[#bdbdbd] rounded-xl sm:flex"
+		class="cursor-pointer border border-[#bdbdbd] text-sm font-medium text-center sm:divide-x sm:divide-[#bdbdbd] rounded-xl sm:flex"
 	>
 		<li class="w-full">
 			<a
 				@click="router.push({ name: 'SoundtracksPlayground' })"
-				class="rounded-l-xl"
+				class="rounded-t-xl sm:rounded-none sm:rounded-l-xl"
 				:class="[
 					props.playground === 'soundtracks'
 						? 'tab-active'
@@ -27,7 +27,7 @@
 		<li class="w-full">
 			<a
 				@click="router.push({ name: 'ImagesPlayground' })"
-				class="rounded-r-xl"
+				class="rounded-b-xl sm:rounded-none sm:rounded-r-xl"
 				:class="[
 					props.playground === 'images'
 						? 'tab-active'
