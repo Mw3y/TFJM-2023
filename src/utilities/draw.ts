@@ -658,7 +658,7 @@ export async function getPixelColorsFromImage({
 
 	// Make the image fit in a xResolution * yResolution canvas
 	const fittedImage = await createImage(
-		createFittedInCanvasImage({
+		createImageFittedInCanvas({
 			canvas,
 			image,
 			width: canvas.width,
@@ -695,10 +695,10 @@ export async function getPixelColorsFromImage({
  * @example
  *
  * ```js
- * createFittedInCanvasImage({canvas, image, x, y, width, height, offsetX, offsetY})
+ * createImageFittedInCanvas({canvas, image, x, y, width, height, offsetX, offsetY})
  * ```
  */
-export function createFittedInCanvasImage({
+export function createImageFittedInCanvas({
 	canvas,
 	image,
 	x = 0,
