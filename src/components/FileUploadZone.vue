@@ -64,7 +64,7 @@
 				</svg>
 				<p class="flex text-sm text-neutral-500">
 					<span class="font-semibold text-center my-auto">
-						Cliquez pour utiliser votre propre image
+						Cliquez ici pour utiliser votre propre image.
 					</span>
 				</p>
 			</div>
