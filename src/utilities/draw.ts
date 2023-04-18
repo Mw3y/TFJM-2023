@@ -323,7 +323,7 @@ export function drawSoundtracks(
 	// Scale everything up for easier visibility
 	allNotesRows.scale.copy(new Vector3(scaleFactor, scaleFactor, scaleFactor));
 	// Center the camera & change the zoom level
-	centerObject(allNotesRows)
+	centerObject(allNotesRows);
 	setCameraZoomToFitObject(
 		camera,
 		allNotesRows,
@@ -531,8 +531,7 @@ export function createPixelatedImage({
 			// Otherwise, its color is based on the color of the previous pixel that it center falls within.
 			const pixelColor = isModuloNull
 				? new Color(0x000000)
-				: colors[yAxisColorIndex]?.[xAxisColorIndex] ??
-				  new Color("red");
+				: colors[yAxisColorIndex]?.[xAxisColorIndex];
 
 			// Create the pixel object
 			const { mesh, outline } = createRectangleObject(
