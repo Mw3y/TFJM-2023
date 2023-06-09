@@ -1,7 +1,7 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 
 export default createRouter({
-	history: createWebHistory("/TFJM-2023"),
+	history: createWebHashHistory("/TFJM-2023/"),
 	routes: [
 		{
 			name: "SoundtracksPlayground",

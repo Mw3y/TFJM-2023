@@ -3,10 +3,12 @@
   "private": true,
   "version": "15.4.0",
   "type": "module",
+  "homepage": "https://mw3y.github.io/TFJM-2023/",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "pnpm run build && gh-pages -d dist"
   },
   "dependencies": {
     "@vueuse/core": "^9.13.0",
@@ -22,6 +24,7 @@
     "@types/three": "^0.149.0",
     "@vitejs/plugin-vue": "^4.0.0",
     "autoprefixer": "^10.4.14",
+    "gh-pages": "^5.0.0",
     "postcss": "^8.4.21",
     "prettier": "^2.8.4",
     "prettier-plugin-tailwindcss": "^0.2.5",

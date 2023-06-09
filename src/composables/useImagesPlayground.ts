@@ -46,7 +46,7 @@ export async function useImagesPlayground(
 		async function () {
 			const image =
 				currentImage.value ??
-				(await createImage("/images/mona_lisa.jpg"));
+				(await createImage("./images/mona_lisa.jpg"));
 
 			let newResolutions = new Array<number[]>();
 			// Extract the resolutions from the proxy
