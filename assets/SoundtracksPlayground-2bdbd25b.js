@@ -1,1 +1,0 @@
-import{_ as o}from"./Playground.vue_vue_type_script_setup_true_lang-0227e6e4.js";import{d as a,o as e,c as r}from"./index-6c2df390.js";const p=a({__name:"SoundtracksPlayground",setup(t){return(n,s)=>(e(),r(o,{type:"soundtracks"}))}});export{p as default};
