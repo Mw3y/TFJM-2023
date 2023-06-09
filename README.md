@@ -1,6 +1,6 @@
 # Problèmes du TFJM² 2023
 
-<img src="./tfjm_header.jpg">
+<img src="./.readme/tfjm_header.jpg">
 
 Vous trouverez ici deux approches différentes pour modéliser un problème mathématique complexe du Tournois Français des Jeunes Mathématiciens et Mathématiciennes :
 
@@ -12,11 +12,11 @@ Si Perrine choisit une nouvelle résolution m ⩾ 1, le logiciel crée un nouvel
 
 Exemple de changement de résolution (passage de n = 4 à m = 7) :
 
-<img src="./tfjm_problem_4_example.jpg">
+<img src="./.readme/tfjm_problem_4_example.jpg">
 
 -   Programme codé en python (approche non conservée) (branche [problem-4](https://github.com/Mw3y/TFJM-2023/tree/problem-4))
 -   Programme web (branche [problem-4-web](https://github.com/Mw3y/TFJM-2023/tree/problem-4-web))
     -   Accessible à l'adresse : [https://mw3y.github.io/TFJM-2023/](https://mw3y.github.io/TFJM-2023/)
 
-<img src="./tfjm_problem_4_web_notes_example.jpg">
-<img src="./tfjm_problem_4_web_images_example.jpg">
+<img src="./.readme/tfjm_problem_4_web_notes_example.jpg">
+<img src="./.readme/tfjm_problem_4_web_images_example.jpg">
