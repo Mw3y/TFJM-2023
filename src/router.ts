@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 
 export default createRouter({
-	history: createWebHistory("/cpge/tfjm-2023/problem-4"),
+	history: createWebHistory("/TFJM-2023"),
 	routes: [
 		{
 			name: "SoundtracksPlayground",
