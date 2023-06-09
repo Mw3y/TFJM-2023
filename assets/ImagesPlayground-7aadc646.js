@@ -1,0 +1,1 @@
+import{_ as e}from"./Playground.vue_vue_type_script_setup_true_lang-43d480d6.js";import{d as a,o,c as r}from"./index-f940738e.js";const m=a({__name:"ImagesPlayground",setup(s){return(t,n)=>(o(),r(e,{type:"images"}))}});export{m as default};
