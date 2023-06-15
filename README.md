@@ -18,5 +18,18 @@ Exemple de changement de résolution (passage de n = 4 à m = 7) :
 -   Programme web (branche [problem-4-web](https://github.com/Mw3y/TFJM-2023/tree/problem-4-web))
     -   Accessible à l'adresse : [https://mw3y.github.io/TFJM-2023/](https://mw3y.github.io/TFJM-2023/)
 
+## Explications du fonctionnement du programme
+
+1. ### Déterminer si une note est un silence
+<img src="./.readme/modulo_explanation.png">
+
+2. ### Déterminer la couleur d'une note
+<img src="./.readme/colors_explanation.png">
+
+## Exemples d'utilisation du programme
+
+1. ### Mode bande son
 <img src="./.readme/tfjm_problem_4_web_notes_example.jpg">
+
+2. ### Mode image
 <img src="./.readme/tfjm_problem_4_web_images_example.jpg">
