@@ -4,6 +4,8 @@
 
 Vous trouverez ici deux approches différentes pour modéliser un problème mathématique complexe du Tournois Français des Jeunes Mathématiciens et Mathématiciennes :
 
+Le fichier PDF contenant toute la recherche mathématique produite est disponible ici : [Problème 4 version finale P=PR 2023](./.readme/problem_4_final_version_espagnet_filip_ppr.pdf).
+
 ## Problème 4 :
 
 Énoncé : Perrine joue avec un logiciel de montage audio. Elle dispose initialement d’une bande son d’une minute pendant laquelle sont jouées n ⩾ 1 notes distinctes, chacune de durée 1/n. Le logiciel dispose d’une fonctionnalité permettant d’augmenter ou de diminuer la résolution du son.
