@@ -1,6 +1,6 @@
 <script setup lang="ts">
 	import { useWindowSize, watchThrottled } from "@vueuse/core";
-	import { onMounted, ref } from "vue";
+	import { onMounted, ref, watch } from "vue";
 	import { LocationQueryRaw, useRoute, useRouter } from "vue-router";
 	import { PerspectiveCamera, Scene, WebGLRenderer } from "three";
 
@@ -44,11 +44,9 @@
 	);
 	const imageResolutions = ref(defaultImageResolutions(currentRoute));
 
-	const maxScaleFactor = 1e6;
-	const defaultScaleFactor = parseInt(
-		(currentRoute.query["scale-factor"] as string) ?? maxScaleFactor
+	const is3DEnabled = ref(
+		(currentRoute.query["3d-mode"] as string) === "true" ?? false
 	);
-	const scaleFactor = ref(defaultScaleFactor);
 
 	const maxDecimalAccuracy = 1e5;
 	const defaultDecimalAccuracy = parseInt(
@@ -96,13 +94,13 @@
 	};
 
 	/**
-	 * Updates the scale factor
-	 * @param newScaleFactor
+	 * Toggles the 3d mode
+	 * @param newValue
 	 */
-	const changeScaleFactor = (newScaleFactor: number) => {
-		scaleFactor.value = newScaleFactor;
+	const toggle3DMode = (newValue: boolean) => {
+		is3DEnabled.value = newValue;
 
-		// Change the scaleFactor in the url params
+		// Change the "3d-mode" in the url params
 		updateUrlParams();
 	};
 
@@ -113,7 +111,7 @@
 	const changeDecimalAccuracy = (newDecimalAccuracy: number) => {
 		decimalAccuracy.value = newDecimalAccuracy;
 
-		// Change the scaleFactor in the url params
+		// Change the decimal accuracy in the url params
 		updateUrlParams();
 	};
 
@@ -129,17 +127,15 @@
 	 * Updates the url parameters to share playground configuration.
 	 */
 	function updateUrlParams() {
-		// Change the scaleFactor in the url params
-
 		interface QueryType {
-			"scale-factor": number;
+			"3d-mode": string;
 			"decimal-accuracy": number;
 			soundtrackResolutions?: string;
 			imageResolutions?: string;
 		}
 
 		const query: QueryType = {
-			"scale-factor": scaleFactor.value,
+			"3d-mode": is3DEnabled.value.toString(),
 			"decimal-accuracy": decimalAccuracy.value,
 		};
 
@@ -161,12 +157,16 @@
 		renderer = new WebGLRenderer({
 			canvas: canvas.value ?? undefined,
 			alpha: true,
-			antialias: false,
+			antialias: true,
 		});
 		renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.setSize(width.value, height.value);
 
-		const orbitControls = enable2DMovement(camera, renderer);
+		const orbitControls = enable2DMovement(
+			camera,
+			renderer,
+			is3DEnabled.value
+		);
 
 		if (isSoundtracksPlayground)
 			useSoundtracksPlayground(
@@ -174,7 +174,7 @@
 				camera,
 				orbitControls,
 				soundtrackResolutions,
-				scaleFactor,
+				is3DEnabled,
 				decimalAccuracy
 			);
 		else {
@@ -183,7 +183,7 @@
 				camera,
 				orbitControls,
 				imageResolutions,
-				scaleFactor,
+				is3DEnabled,
 				decimalAccuracy,
 				currentImage
 			);
@@ -200,11 +200,10 @@
 	<Sidebar
 		@soundtrackResolutionsChange="changeSoundtracksResolutionList"
 		@imageResolutionsChange="changeImagesResolutionList"
-		@scaleFactorChange.lazy="changeScaleFactor"
+		@toggle3DMode.lazy="toggle3DMode"
 		@decimalAccuracyChange.lazy="changeDecimalAccuracy"
 		@onImageUpload="changeSelectedImage"
-		:scaleFactorMax="maxScaleFactor"
-		:defaultScaleFactor="defaultScaleFactor"
+		:is3DEnabled="is3DEnabled"
 		:decimalAccuracyMax="maxDecimalAccuracy"
 		:defaultDecimalAccuracy="defaultDecimalAccuracy"
 		:defaultSoundtrackResolutions="soundtrackResolutions"

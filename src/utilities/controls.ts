@@ -10,13 +10,14 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
  */
 export function enable2DMovement(
 	camera: PerspectiveCamera,
-	renderer: WebGLRenderer
+	renderer: WebGLRenderer,
+	is3DEnabled: boolean,
 ): OrbitControls {
 	// The control handler.
 	const controls = new OrbitControls(camera, renderer.domElement);
 
 	controls.target.set(0, 0, 0); // view direction perpendicular to XY-plane
-	controls.enableRotate = false; // Disable the possibility to rotate
+	controls.enableRotate = is3DEnabled;
 	controls.enableZoom = true; // Enable mouse scroll zoom
 
 	controls.touches.ONE = TOUCH.PAN;

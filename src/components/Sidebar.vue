@@ -6,8 +6,7 @@
 	import FileUploadZone from "./FileUploadZone.vue";
 
 	const props = defineProps<{
-		scaleFactorMax: number;
-		defaultScaleFactor: number;
+		is3DEnabled: boolean;
 		decimalAccuracyMax: number;
 		defaultDecimalAccuracy: number;
 		defaultSoundtrackResolutions: number[];
@@ -21,18 +20,13 @@
 	const emit = defineEmits<{
 		(e: "soundtrackResolutionsChange", value: Array<number>): void;
 		(e: "imageResolutionsChange", value: Array<number[]>): void;
-		(e: "scaleFactorChange", value: number): void;
+		(e: "toggle3DMode", value: boolean): void;
 		(e: "decimalAccuracyChange", value: number): void;
 		(e: "onImageUpload", value: HTMLImageElement): void;
 	}>();
 
-	const scaleFactor = ref(props.defaultScaleFactor.toString());
-	const scaleFactorLabel = computed(
-		() => "Échelle : " + scaleFactor.value + "%"
-	);
-	watch(scaleFactor, () =>
-		emit("scaleFactorChange", parseInt(scaleFactor.value))
-	);
+	const is3DEnabled = ref(props.is3DEnabled);
+	watch(is3DEnabled, () => emit("toggle3DMode", is3DEnabled.value));
 
 	const decimalAccuracy = ref(props.defaultDecimalAccuracy.toString());
 	const decimalAccuracyLabel = computed(
@@ -171,13 +165,21 @@
 					v-model="decimalAccuracy"
 					id="decimal-accuracy"
 				/>
-				<Range
-					:label="scaleFactorLabel"
-					:min="1"
-					:max="props.scaleFactorMax"
-					v-model="scaleFactor"
-					id="scale-selector"
-				/>
+				<label
+					class="relative inline-flex items-center gap-2 cursor-pointer"
+				>
+					<input
+						type="checkbox"
+						v-model="is3DEnabled"
+						class="sr-only peer"
+					/>
+					<div
+						class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+					></div>
+					<span for="3d-mode" class="font-medium text-neutral-700"
+						>Mode 3D
+					</span>
+				</label>
 			</div>
 			<p class="text-neutral-500 text-sm">
 				<strong>Astuce 🛈 :</strong> Des informations de débogage telles

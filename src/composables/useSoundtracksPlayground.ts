@@ -20,14 +20,14 @@ export function useSoundtracksPlayground(
 	camera: PerspectiveCamera,
 	orbitControls: OrbitControls,
 	resolutions: Ref<number[]>,
-	scaleFactor: Ref<number>,
+	is3DEnabled: Ref<boolean>,
 	decimalAccuracy: Ref<number>
 ) {
 	let colors = generateColorPalette(Math.max(...resolutions.value));
 	const defaultResolutions = resolutions.value;
 
 	watch(
-		[resolutions, scaleFactor, decimalAccuracy],
+		[resolutions, is3DEnabled, decimalAccuracy],
 		function () {
 			// Reset the resolution on bad input
 			if (resolutions.value.length < 1) {
@@ -41,7 +41,7 @@ export function useSoundtracksPlayground(
 				camera,
 				resolutions.value,
 				colors,
-				scaleFactor.value,
+				is3DEnabled.value,
 				decimalAccuracy.value,
 				orbitControls
 			);

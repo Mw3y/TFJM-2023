@@ -37,12 +37,12 @@ export async function useImagesPlayground(
 	camera: PerspectiveCamera,
 	orbitControls: OrbitControls,
 	resolutions: Ref<number[][]>,
-	scaleFactor: Ref<number>,
+	is3DEnabled: Ref<boolean>,
 	decimalAccuracy: Ref<number>,
 	currentImage: Ref<HTMLImageElement | null>
 ) {
 	watch(
-		[resolutions, scaleFactor, decimalAccuracy, currentImage],
+		[resolutions, is3DEnabled, decimalAccuracy, currentImage],
 		async function () {
 			const image =
 				currentImage.value ??
@@ -60,7 +60,7 @@ export async function useImagesPlayground(
 				orbitControls,
 				newResolutions,
 				image,
-				scaleFactor.value,
+				is3DEnabled.value,
 				decimalAccuracy.value
 			);
 		},

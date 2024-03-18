@@ -1,6 +1,5 @@
 import {
 	Mesh,
-	PlaneGeometry,
 	MeshBasicMaterial,
 	Color,
 	EdgesGeometry,
@@ -15,6 +14,8 @@ import {
 	BufferGeometry,
 	Scene,
 	PerspectiveCamera,
+	BoxGeometry,
+	PlaneGeometry,
 } from "three";
 
 import { Decimal } from "decimal.js";
@@ -83,26 +84,32 @@ export async function createImage(src: string): Promise<HTMLImageElement> {
  * @param geometry - The object geometry
  * @param color - The color of the outline
  */
-export function createObjectOutline(geometry: PlaneGeometry, color: Color) {
-	const lineGeometry = new EdgesGeometry(geometry);
-	const material = new LineBasicMaterial({ color });
+export function createObjectOutline(
+	geometry: PlaneGeometry | BoxGeometry,
+	color: Color
+) {
+	const lineGeometry = new EdgesGeometry(geometry, 40);
+	const material = new LineBasicMaterial({
+		color,
+	});
 	return new LineSegments(lineGeometry, material);
 }
 
 /**
- * Creates a new rectangle mesh and its outline.
- * The rectangle is centered at the given position.
+ * Creates a new plane or box mesh and its outline.
+ * The box is centered at the given position.
  *
  * @example
- * const noteObject = createRectangleObject(new Vector3(0, 0, 0))
+ * const noteObject = createPlaneOrBoxObject(new Vector3(0, 0, 0))
  *
  * @param position - The position of the center of the note
  * @param width - The width of the note
  * @param height - The height of the note
  * @return { Array } An array with the note mesh and the outline.
  */
-export function createRectangleObject(
+export function createPlaneOrBoxObject(
 	position: Vector3,
+	is3DEnabled: boolean,
 	color: Color = new Color(Math.random() * 0xffffff),
 	width: number = 1,
 	height: number = 1,
@@ -110,7 +117,9 @@ export function createRectangleObject(
 ) {
 	// Create the mesh of the rectangle
 	const mesh = new Mesh(
-		new PlaneGeometry(width, height, 1, 1),
+		is3DEnabled
+			? new BoxGeometry(width, height, height)
+			: new PlaneGeometry(width, height),
 		new MeshBasicMaterial({
 			color,
 		})
@@ -150,12 +159,14 @@ export function createRectangleObject(
 export function createIndividualSoundtrack({
 	notesNumber,
 	colors,
+	is3DEnabled,
 	noteWidth = new Decimal(1),
 	noteHeight = new Decimal(1),
 	previousNoteWidth = new Decimal(1),
 }: {
 	notesNumber: number;
 	colors: Array<Color>;
+	is3DEnabled: boolean;
 	noteWidth?: Decimal;
 	noteHeight?: Decimal;
 	previousNoteWidth?: Decimal;
@@ -205,8 +216,9 @@ export function createIndividualSoundtrack({
 		});
 
 		// Create the note object
-		const { mesh, outline } = createRectangleObject(
+		const { mesh, outline } = createPlaneOrBoxObject(
 			position,
+			is3DEnabled,
 			noteColor,
 			noteWidth.toNumber(),
 			noteHeight.toNumber(),
@@ -236,7 +248,8 @@ export function createIndividualSoundtrack({
  */
 export function createSoundtracks(
 	resolutions: Array<number>,
-	colors: Array<Color>
+	colors: Array<Color>,
+	is3DEnabled: boolean
 ): Array<Group> {
 	let previousNoteWidth = new Decimal(1);
 	let previousRowWidth;
@@ -258,6 +271,7 @@ export function createSoundtracks(
 			notesNumber: notesNumber,
 			noteWidth: new Decimal(noteWidth),
 			previousNoteWidth: previousNoteWidth,
+			is3DEnabled,
 			colors,
 		});
 
@@ -298,7 +312,7 @@ export function createDashedLine(startPosition: Vector3, endPosition: Vector3) {
  * @param camera
  * @param resolutions
  * @param colors
- * @param scaleFactor
+ * @param is3DEnabled
  * @param decimalAccuracy
  * @param orbitControls
  */
@@ -307,7 +321,7 @@ export function drawSoundtracks(
 	camera: PerspectiveCamera,
 	resolutions: Array<number>,
 	colors: Array<Color>,
-	scaleFactor: number,
+	is3DEnabled: boolean,
 	decimalAccuracy: number,
 	orbitControls: OrbitControls
 ) {
@@ -318,19 +332,12 @@ export function drawSoundtracks(
 		precision: decimalAccuracy,
 	});
 
-	const notesRows = createSoundtracks(resolutions, colors);
+	const notesRows = createSoundtracks(resolutions, colors, is3DEnabled);
 	const allNotesRows = new Group().add(...notesRows);
-	// Scale everything up for easier visibility
-	allNotesRows.scale.copy(new Vector3(scaleFactor, scaleFactor, scaleFactor));
+
 	// Center the camera & change the zoom level
 	centerObject(allNotesRows);
-	setCameraZoomToFitObject(
-		camera,
-		allNotesRows,
-		orbitControls,
-		2.5,
-		scaleFactor
-	);
+	setCameraZoomToFitObject(camera, allNotesRows, orbitControls, 2.5);
 
 	// Render the notes rows
 	scene.add(allNotesRows);
@@ -344,7 +351,7 @@ export function drawSoundtracks(
  * @param orbitControls
  * @param resolutions
  * @param image
- * @param scaleFactor
+ * @param is3DEnabled
  * @param decimalAccuracy
  */
 export async function drawPixelatedImages(
@@ -353,7 +360,7 @@ export async function drawPixelatedImages(
 	orbitControls: OrbitControls,
 	resolutions: Array<number[]>,
 	image: HTMLImageElement,
-	scaleFactor: number,
+	is3DEnabled: boolean,
 	decimalAccuracy: number
 ) {
 	clearScene(scene);
@@ -373,18 +380,10 @@ export async function drawPixelatedImages(
 		return;
 	}
 
-	const allImages = createPixelatedImages(resolutions, colors);
+	const allImages = createPixelatedImages(resolutions, colors, is3DEnabled);
 
-	// Scale everything up for easier visibility
-	allImages.scale.copy(new Vector3(scaleFactor, scaleFactor, scaleFactor));
 	// Center the camera & change the zoom level
-	setCameraZoomToFitObject(
-		camera,
-		allImages,
-		orbitControls,
-		2.5,
-		scaleFactor
-	);
+	setCameraZoomToFitObject(camera, allImages, orbitControls, 2.5);
 
 	// Render all of the images on the scene
 	scene.add(allImages);
@@ -399,7 +398,8 @@ export async function drawPixelatedImages(
  */
 export function createPixelatedImages(
 	resolutions: Array<number[]>,
-	colors: Color[][]
+	colors: Color[][],
+	is3DEnabled: boolean
 ) {
 	const imagesGroup = new Group();
 	let previousPixelWidth, previousPixelHeight;
@@ -428,6 +428,7 @@ export function createPixelatedImages(
 			),
 			previousPixelWidth: previousPixelWidth ?? xAxisPixelSize,
 			previousPixelHeight: previousPixelHeight ?? yAxisPixelSize,
+			is3DEnabled,
 		});
 
 		// Center the image on the x-axis
@@ -468,6 +469,7 @@ export function createPixelatedImage({
 	pixelHeight,
 	previousPixelWidth,
 	previousPixelHeight,
+	is3DEnabled,
 }: {
 	xResolution: number;
 	yResolution: number;
@@ -476,6 +478,7 @@ export function createPixelatedImage({
 	pixelHeight: Decimal;
 	previousPixelWidth: Decimal;
 	previousPixelHeight: Decimal;
+	is3DEnabled: boolean;
 }) {
 	const debugData = [];
 	// If there's too many pixels, the outline is hidden.
@@ -534,8 +537,9 @@ export function createPixelatedImage({
 				: colors[yAxisColorIndex]?.[xAxisColorIndex];
 
 			// Create the pixel object
-			const { mesh, outline } = createRectangleObject(
+			const { mesh, outline } = createPlaneOrBoxObject(
 				position,
+				is3DEnabled,
 				pixelColor,
 				pixelWidth.toNumber(),
 				pixelHeight.toNumber(),
@@ -592,7 +596,8 @@ export function createPixelatedImage({
  */
 export function createPixelatedImageObject(
 	pixelColors: Array<Color[]>,
-	orthonormalFactor: number
+	orthonormalFactor: number,
+	is3dEnabled: boolean
 ) {
 	const pixelatedImage = new Group();
 	// Iterate over each row of the pixelated image
@@ -600,8 +605,9 @@ export function createPixelatedImageObject(
 		// Iterate over each pixel of the row
 		const rowPixelsGroup = new Group();
 		for (let j = 0; j < pixelColors[i].length; j++) {
-			const { mesh, outline } = createRectangleObject(
+			const { mesh, outline } = createPlaneOrBoxObject(
 				new Vector3(j, i * orthonormalFactor),
+				is3dEnabled,
 				pixelColors[i][j],
 				1,
 				orthonormalFactor
@@ -648,7 +654,6 @@ export async function getPixelColorsFromImage({
 
 	// Set the canvas size to a multiple of the resolution used
 	// It allows to have whole number pixel size
-	// TODO: Add scalefactor
 	canvas.width = xResolution * 100;
 	canvas.height = yResolution * 100 * orthonormalFactor;
 
